@@ -68,8 +68,8 @@ suite
 							(fDone) =>
 							{
 								let _Pict = configureTestPict();
-								let _PictViewPictApplication = _Pict.addApplication({}, 'Pict-PictApplication',  libPictApplication);
-								Expect(_PictViewPictApplication).to.be.an('object');
+								let _PictApplication = _Pict.addApplication({}, 'Pict-PictApplication',  libPictApplication);
+								Expect(_PictApplication).to.be.an('object');
 								return fDone();
 							}
 						);
