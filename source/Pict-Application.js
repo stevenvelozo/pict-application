@@ -71,7 +71,7 @@ class PictApplication extends libFableServiceBase
 
     render(pViewHash, pRenderableHash, pRenderDestinationAddress, pTemplateDataAddress)
     {
-        let tmpView = (typeof(pViewHash) === 'string') ? this.services.PictView[pViewHash] : false;
+        let tmpView = (typeof(pViewHash) === 'string') ? this.serviceMap.PictView[pViewHash] : false;
         if (!tmpView)
         {
             this.log.error(`PictApplication [${this.UUID}]::[${this.Hash}] ${this.options.Name} could not render from View ${pViewHash} because it is not a valid view.`);
@@ -84,7 +84,7 @@ class PictApplication extends libFableServiceBase
 
     renderAsync(pViewHash, pRenderableHash, pRenderDestinationAddress, pTemplateDataAddress, fCallback)
     {
-        let tmpView = (typeof(pViewHash) === 'string') ? this.services.PictView[pViewHash] : false;
+        let tmpView = (typeof(pViewHash) === 'string') ? this.serviceMap.PictView[pViewHash] : false;
         if (!tmpView)
         {
             this.log.error(`PictApplication [${this.UUID}]::[${this.Hash}] ${this.options.Name} could not render from View ${pViewHash} because it is not a valid view.`);
