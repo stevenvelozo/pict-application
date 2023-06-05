@@ -24,6 +24,9 @@ class PictApplication extends libFableServiceBase
         super(pFable, tmpOptions, pServiceHash);
         this.serviceType = 'PictApplication';
 
+        // Convenience and consistency naming
+        this.pict = this.fable;
+        // Wire in the essential Pict state
         this.AppData = this.fable.AppData;
 
         this.initializationFunctionSet = [];
@@ -57,16 +60,29 @@ class PictApplication extends libFableServiceBase
         return true;
     }
 
+    onBeforeInitialize()
+    {
+        return true;
+    }
+
+    // Used for controls and the like to initialize their state
     internalInitialize()
+    {
+        return true;
+    }
+
+    onAfterInitialize()
     {
         return true;
     }
 
     initialize()
     {
+        this.onBeforeInitialize();
         this.log.info(`Pict Application ${this.options.Name}[${this.UUID}]::[${this.Hash}] beginning initialization...`);
         this.internalInitialize();
         this.log.info(`Pict Application ${this.options.Name}[${this.UUID}]::[${this.Hash}] initialization complete.`);
+        this.onAfterInitialize();
     }
 
     render(pViewHash, pRenderableHash, pRenderDestinationAddress, pTemplateDataAddress)
