@@ -1,6 +1,6 @@
 {
     "name": "pict-application",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "description": "",
     "main": "source/Pict-Application.js",
     "scripts": {
@@ -45,6 +45,6 @@
         ]
     },
     "dependencies": {
-        "fable-serviceproviderbase": "^3.0.7"
+        "fable-serviceproviderbase": "^3.0.10"
     }
 }
