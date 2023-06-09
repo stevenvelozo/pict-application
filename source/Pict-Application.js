@@ -2,16 +2,18 @@ const libFableServiceBase = require('fable-serviceproviderbase')
 
 const defaultPictSettings = (
 	{
-        Name: 'DefaultPictApplication',
-        InitializeOnLoad: true,
+		Name: 'DefaultPictApplication',
+
 		// The main "viewport" is the view that is used to host our application
 		MainViewportView: 'Default-View',
-        MainViewportRenderable: 'Application-Default-View-Renderable',
-        MainViewportDestinationAddress: 'Application-Destination-Address',
-        MainViewportDefaultDataAddress: '',
-		// Whether or not we should automatically render the main viewport when appropriate
-		AutoRenderMainViewportView: false,
-        Manifests: {},
+		MainViewportRenderable: 'Application-Default-View-Renderable',
+		MainViewportDestinationAddress: 'Application-Destination-Address',
+		MainViewportDefaultDataAddress: '',
+
+		// Whether or not we should automatically render the main viewport when we initialize pict
+		AutoRenderMainViewportViewOnInitialize: false,
+
+		Manifests: {},
 		// The prefix to prepend on all template destination hashes
 		IdentifierAddressPrefix: 'PICT-'
 	});
@@ -20,95 +22,280 @@ class PictApplication extends libFableServiceBase
 {
 	constructor(pFable, pOptions, pServiceHash)
 	{
-        let tmpOptions = Object.assign({}, JSON.parse(JSON.stringify(defaultPictSettings)), pOptions);
-        super(pFable, tmpOptions, pServiceHash);
-        this.serviceType = 'PictApplication';
+		let tmpOptions = Object.assign({}, JSON.parse(JSON.stringify(defaultPictSettings)), pOptions);
+		super(pFable, tmpOptions, pServiceHash);
+		this.serviceType = 'PictApplication';
 
-        // Convenience and consistency naming
-        this.pict = this.fable;
-        // Wire in the essential Pict state
-        this.AppData = this.fable.AppData;
+		// Convenience and consistency naming
+		this.pict = this.fable;
+		// Wire in the essential Pict state
+		this.AppData = this.fable.AppData;
 
-        this.initializationFunctionSet = [];
+		this.initializeTimestamp = false;
+		this.lastSolvedTimestamp = false;
 
-        let tmpManifestKeys = Object.keys(this.options.Manifests);
-        if (tmpManifestKeys.length > 0)
-        {
-            for (let i = 0; i < tmpManifestKeys.length; i++ )
-            {
-                // Load each manifest
-                let tmpManifestKey = tmpManifestKeys[i];
-                this.fable.serviceManager.instantiateServiceProvider('Manifest', this.options.Manifests[tmpManifestKey], tmpManifestKey);
-            }
-        }
-
-        if (this.options.InitializeOnLoad)
-        {
-            return this.initialize();
-        }
-        if (this.options.AutoRenderMainViewportView)
-        {
-            this.log.info(`Pict Application ${this.options.Name}[${this.UUID}]::[${this.Hash}] beginning auto render of [${this.options.MainViewportView}::${this.options.MainViewportRenderable}].`);
-            this.renderAsync(this.options.MainViewportView, this.options.MainViewportRenderable, this.options.MainViewportDestinationAddress, this.options.MainViewportDefaultDataAddress, ()=>{});
-        }
+		// Load all the manifests for the application
+		let tmpManifestKeys = Object.keys(this.options.Manifests);
+		if (tmpManifestKeys.length > 0)
+		{
+			for (let i = 0; i < tmpManifestKeys.length; i++)
+			{
+				// Load each manifest
+				let tmpManifestKey = tmpManifestKeys[i];
+				this.fable.serviceManager.instantiateServiceProvider('Manifest', this.options.Manifests[tmpManifestKey], tmpManifestKey);
+			}
+		}
 	}
 
-    // TODO: do we need an asynchronous version of this?
-    solve()
-    {
-        this.log.info(`Pict Application ${this.options.Name}[${this.UUID}]::[${this.Hash}] executing solve() function...`)
-        return true;
-    }
+	onBeforeSolve()
+	{
+		if (this.pict.LogNoisiness > 3)
+		{
+			this.log.trace(`PictApp [${this.UUID}]::[${this.Hash}] ${this.options.Name} onBeforeSolve:`);
+		}
+		return true;
+	}
+	onBeforeSolveAsync(fCallback)
+	{
+		this.onBeforeSolve();
+		return fCallback();
+	}
 
-    onBeforeInitialize()
-    {
-        return true;
-    }
+	onSolve()
+	{
+		if (this.pict.LogNoisiness > 3)
+		{
+			this.log.trace(`PictApp [${this.UUID}]::[${this.Hash}] ${this.options.Name} onSolve:`);
+		}
+		return true;
+	}
+	onSolveAsync(fCallback)
+	{
+		this.onSolve();
+		return fCallback();
+	}
 
-    // Used for controls and the like to initialize their state
-    internalInitialize()
-    {
-        return true;
-    }
+	// TODO: do we need an asynchronous version of this?
+	solve()
+	{
+		if (this.pict.LogNoisiness > 2)
+		{
+			this.log.trace(`PictApp [${this.UUID}]::[${this.Hash}] ${this.options.Name} executing solve() function...`)
+		}
+		this.onBeforeSolve();
+		// Now walk through any loaded views and initialize them as well.
+		let tmpLoadedViews = Object.keys(this.pict.views);
+		let tmpViewsToSolve = [];
+		for (let i = 0; i < tmpLoadedViews.length; i++)
+		{
+			let tmpView = this.pict.views[tmpLoadedViews[i]];
+			if (tmpView.options.AutoInitialize)
+			{
+				tmpViewsToSolve.push(tmpView);
+			}
+		}
+		// Sort the views by their priority (if they are all priority 0, it will end up being add order due to JSON Object Property Key order stuff)
+		tmpViewsToSolve.sort((a, b) => { return a.options.AutoInitializeOrdinal - b.options.AutoInitializeOrdinal; });
+		for (let i = 0; i < tmpViewsToSolve.length; i++)
+		{
+			tmpViewsToSolve[i].solve();
+		}
+		this.onSolve();
+		this.onAfterSolve();
+		this.lastSolvedTimestamp = this.fable.log.getTimeStamp();
+		return true;
+	}
+	solveAsync(fCallback)
+	{
+		let tmpAnticipate = this.fable.serviceManager.instantiateServiceProviderWithoutRegistration('Anticipate');
 
-    onAfterInitialize()
-    {
-        return true;
-    }
+		tmpAnticipate.anticipate(this.onBeforeSolveAsync.bind(this));
+		// Walk through any loaded views and solve them as well.
+		let tmpLoadedViews = Object.keys(this.pict.views);
+		let tmpViewsToSolve = [];
+		for (let i = 0; i < tmpLoadedViews.length; i++)
+		{
+			let tmpView = this.pict.views[tmpLoadedViews[i]];
+			if (tmpView.options.AutoSolveWithApp)
+			{
+				tmpViewsToSolve.push(tmpView);
+			}
+		}
+		// Sort the views by their priority (if they are all priority 0, it will end up being add order due to JSON Object Property Key order stuff)
+		tmpViewsToSolve.sort((a, b) => { return a.options.AutoSolveOrdinal - b.options.AutoSolveOrdinal; });
+		for (let i = 0; i < tmpViewsToSolve.length; i++)
+		{
+			tmpViewsToSolve[i].initialize();
+		}
+		tmpAnticipate.anticipate(this.onSolveAsync.bind(this));
+		tmpAnticipate.anticipate(this.onAfterSolve.bind(this));
 
-    initialize()
-    {
-        this.onBeforeInitialize();
-        this.log.info(`Pict Application ${this.options.Name}[${this.UUID}]::[${this.Hash}] beginning initialization...`);
-        this.internalInitialize();
-        this.log.info(`Pict Application ${this.options.Name}[${this.UUID}]::[${this.Hash}] initialization complete.`);
-        this.onAfterInitialize();
-    }
+		tmpAnticipate.wait(
+			(pError) =>
+			{
+				if (this.pict.LogNoisiness > 2)
+				{
+					this.log.trace(`PictApp [${this.UUID}]::[${this.Hash}] ${this.options.Name} solveAsync() complete.`);
+				}
+				this.lastSolvedTimestamp = this.fable.log.getTimeStamp();
+				return fCallback(pError);
+			});
+	}
 
-    render(pViewHash, pRenderableHash, pRenderDestinationAddress, pTemplateDataAddress)
-    {
-        let tmpView = (typeof(pViewHash) === 'string') ? this.servicesMap.PictView[pViewHash] : false;
-        if (!tmpView)
-        {
-            this.log.error(`PictApplication [${this.UUID}]::[${this.Hash}] ${this.options.Name} could not render from View ${pViewHash} because it is not a valid view.`);
-            return false;
-        }
+	onAfterSolve()
+	{
+		if (this.pict.LogNoisiness > 3)
+		{
+			this.log.trace(`PictApp [${this.UUID}]::[${this.Hash}] ${this.options.Name} onAfterSolve:`);
+		}
+		return true;
+	}
+	onAfterSolveAsync(fCallback)
+	{
+		this.onAfterSolve();
+		return fCallback();
+	}
+
+	onBeforeInitialize()
+	{
+		if (this.pict.LogNoisiness > 3)
+		{
+			this.log.trace(`PictApp [${this.UUID}]::[${this.Hash}] ${this.options.Name} onBeforeInitialize:`);
+		}
+		return true;
+	}
+	onBeforeInitializeAsync(fCallback)
+	{
+		this.onBeforeInitialize();
+		return fCallback();
+	}
+
+	onInitialize()
+	{
+
+		if (this.pict.LogNoisiness > 3)
+		{
+			this.log.trace(`PictApp [${this.UUID}]::[${this.Hash}] ${this.options.Name} onInitialize:`);
+		}
+		return true;
+	}
+	onInitializeAsync(fCallback)
+	{
+		this.onInitialize();
+		return fCallback();
+	}
+
+	initialize()
+	{
+		this.onBeforeInitialize();
+		this.onInitialize();
+		// Now walk through any loaded views and initialize them as well.
+		let tmpLoadedViews = Object.keys(this.pict.views);
+		let tmpViewsToInitialize = [];
+		for (let i = 0; i < tmpLoadedViews.length; i++)
+		{
+			let tmpView = this.pict.views[tmpLoadedViews[i]];
+			if (tmpView.options.AutoInitialize)
+			{
+				tmpViewsToInitialize.push(tmpView);
+			}
+		}
+		// Sort the views by their priority (if they are all priority 0, it will end up being add order due to JSON Object Property Key order stuff)
+		tmpViewsToInitialize.sort((a, b) => { return a.options.AutoInitializeOrdinal - b.options.AutoInitializeOrdinal; });
+		for (let i = 0; i < tmpViewsToInitialize.length; i++)
+		{
+			tmpViewsToInitialize[i].initialize();
+		}
+		this.onAfterInitialize();
+		return true;
+	}
+	initializeAsync(fCallBack)
+	{
+		let tmpAnticipate = this.fable.serviceManager.instantiateServiceProviderWithoutRegistration('Anticipate');
+
+		if (this.pict.LogNoisiness > 3)
+		{
+			this.log.trace(`PictApp [${this.UUID}]::[${this.Hash}] ${this.options.Name} beginning initialization...`);
+		}
+
+		tmpAnticipate.anticipate(this.onBeforeInitializeAsync.bind(this));
+		tmpAnticipate.anticipate(this.onInitializeAsync.bind(this));
+		// Now walk through any loaded views and initialize them as well.
+		// TODO: Some optimization cleverness could be gained by grouping them into a parallelized async operation, by ordinal.
+		let tmpLoadedViews = Object.keys(this.pict.views);
+		let tmpViewsToInitialize = [];
+		for (let i = 0; i < tmpLoadedViews.length; i++)
+		{
+			let tmpView = this.pict.views[tmpLoadedViews[i]];
+			if (tmpView.options.AutoInitialize)
+			{
+				tmpViewsToInitialize.push(tmpView);
+			}
+		}
+		// Sort the views by their priority (if they are all priority 0, it will end up being add order due to JSON Object Property Key order stuff)
+		tmpViewsToInitialize.sort((a, b) => { return a.options.AutoInitializeOrdinal - b.options.AutoInitializeOrdinal; });
+		for (let i = 0; i < tmpViewsToInitialize.length; i++)
+		{
+			let tmpView = tmpViewsToInitialize[i];
+			tmpAnticipate.anticipate(tmpView.initializeAsync.bind(tmpView));
+		}
+		tmpAnticipate.anticipate(this.onAfterInitializeAsync.bind(this));
+
+		tmpAnticipate.wait(
+			(pError) =>
+			{
+				if (this.pict.LogNoisiness > 2)
+				{
+					this.log.trace(`PictApp [${this.UUID}]::[${this.Hash}] ${this.options.Name} initialization complete.`);
+				}
+				return fCallBack();
+			});
+	}
+
+	onAfterInitialize()
+	{
+		if (this.pict.LogNoisiness > 3)
+		{
+			this.log.trace(`PictApp [${this.UUID}]::[${this.Hash}] ${this.options.Name} onAfterInitialize:`);
+		}
+		return true;
+	}
+	onAfterInitializeAsync(fCallback)
+	{
+		this.onAfterInitialize();
+		return fCallback();
+	}
+
+	render(pViewHash, pRenderableHash, pRenderDestinationAddress, pTemplateDataAddress)
+	{
+		let tmpView = (typeof (pViewHash) === 'string') ? this.servicesMap.PictView[pViewHash] : false;
+		if (!tmpView)
+		{
+			if (this.pict.LogNoisiness > 3)
+			{
+				this.log.error(`PictApp [${this.UUID}]::[${this.Hash}] ${this.options.Name} could not render from View ${pViewHash} because it is not a valid view.`);
+			}
+			return false;
+		}
 
 
-        return tmpView.render(pRenderableHash, pRenderDestinationAddress, pTemplateDataAddress);
-    }
+		return tmpView.render(pRenderableHash, pRenderDestinationAddress, pTemplateDataAddress);
+	}
 
-    renderAsync(pViewHash, pRenderableHash, pRenderDestinationAddress, pTemplateDataAddress, fCallback)
-    {
-        let tmpView = (typeof(pViewHash) === 'string') ? this.servicesMap.PictView[pViewHash] : false;
-        if (!tmpView)
-        {
-            this.log.error(`PictApplication [${this.UUID}]::[${this.Hash}] ${this.options.Name} could not render from View ${pViewHash} because it is not a valid view.`);
-            return false;
-        }
+	renderAsync(pViewHash, pRenderableHash, pRenderDestinationAddress, pTemplateDataAddress, fCallback)
+	{
+		let tmpView = (typeof (pViewHash) === 'string') ? this.servicesMap.PictView[pViewHash] : false;
+		if (!tmpView)
+		{
+			if (this.pict.LogNoisiness > 3)
+			{
+				this.log.error(`PictApp [${this.UUID}]::[${this.Hash}] ${this.options.Name} could not asynchronously render from View ${pViewHash} because it is not a valid view.`);
+			}
+			return false;
+		}
 
-        return tmpView.renderAsync(pRenderableHash, pRenderDestinationAddress, pTemplateDataAddress, fCallback);
-    }
+		return tmpView.renderAsync(pRenderableHash, pRenderDestinationAddress, pTemplateDataAddress, fCallback);
+	}
 }
 
 module.exports = PictApplication;

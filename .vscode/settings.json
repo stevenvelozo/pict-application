@@ -1,0 +1,12 @@
+{
+	"favorites.resources": [
+		{
+			"filePath": "node_modules/pict-view/source/Pict-View.js",
+			"group": "Default"
+		},
+		{
+			"filePath": "node_modules/pict/source/Pict.js",
+			"group": "Default"
+		}
+	]
+}
