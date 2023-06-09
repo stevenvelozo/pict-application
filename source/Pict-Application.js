@@ -187,69 +187,88 @@ class PictApplication extends libFableServiceBase
 
 	initialize()
 	{
-		this.onBeforeInitialize();
-		this.onInitialize();
-		// Now walk through any loaded views and initialize them as well.
-		let tmpLoadedViews = Object.keys(this.pict.views);
-		let tmpViewsToInitialize = [];
-		for (let i = 0; i < tmpLoadedViews.length; i++)
+		if (!this.initializeTimestamp)
 		{
-			let tmpView = this.pict.views[tmpLoadedViews[i]];
-			if (tmpView.options.AutoInitialize)
+			this.onBeforeInitialize();
+			this.onInitialize();
+			// Now walk through any loaded views and initialize them as well.
+			let tmpLoadedViews = Object.keys(this.pict.views);
+			let tmpViewsToInitialize = [];
+			for (let i = 0; i < tmpLoadedViews.length; i++)
 			{
-				tmpViewsToInitialize.push(tmpView);
+				let tmpView = this.pict.views[tmpLoadedViews[i]];
+				if (tmpView.options.AutoInitialize)
+				{
+					tmpViewsToInitialize.push(tmpView);
+				}
 			}
+			// Sort the views by their priority (if they are all priority 0, it will end up being add order due to JSON Object Property Key order stuff)
+			tmpViewsToInitialize.sort((a, b) => { return a.options.AutoInitializeOrdinal - b.options.AutoInitializeOrdinal; });
+			for (let i = 0; i < tmpViewsToInitialize.length; i++)
+			{
+				tmpViewsToInitialize[i].initialize();
+			}
+			this.onAfterInitialize();
+			this.initializeTimestamp = this.fable.log.getTimeStamp();
+			return true;
 		}
-		// Sort the views by their priority (if they are all priority 0, it will end up being add order due to JSON Object Property Key order stuff)
-		tmpViewsToInitialize.sort((a, b) => { return a.options.AutoInitializeOrdinal - b.options.AutoInitializeOrdinal; });
-		for (let i = 0; i < tmpViewsToInitialize.length; i++)
+		else
 		{
-			tmpViewsToInitialize[i].initialize();
+			this.log.warn(`PictApp [${this.UUID}]::[${this.Hash}] ${this.options.Name} initialize called but initialization is already completed.  Aborting.`);
+			return false;
 		}
-		this.onAfterInitialize();
-		return true;
 	}
 	initializeAsync(fCallBack)
 	{
-		let tmpAnticipate = this.fable.serviceManager.instantiateServiceProviderWithoutRegistration('Anticipate');
-
-		if (this.pict.LogNoisiness > 3)
+		if (!this.initializeTimestamp)
 		{
-			this.log.trace(`PictApp [${this.UUID}]::[${this.Hash}] ${this.options.Name} beginning initialization...`);
-		}
+			let tmpAnticipate = this.fable.serviceManager.instantiateServiceProviderWithoutRegistration('Anticipate');
 
-		tmpAnticipate.anticipate(this.onBeforeInitializeAsync.bind(this));
-		tmpAnticipate.anticipate(this.onInitializeAsync.bind(this));
-		// Now walk through any loaded views and initialize them as well.
-		// TODO: Some optimization cleverness could be gained by grouping them into a parallelized async operation, by ordinal.
-		let tmpLoadedViews = Object.keys(this.pict.views);
-		let tmpViewsToInitialize = [];
-		for (let i = 0; i < tmpLoadedViews.length; i++)
-		{
-			let tmpView = this.pict.views[tmpLoadedViews[i]];
-			if (tmpView.options.AutoInitialize)
+			if (this.pict.LogNoisiness > 3)
 			{
-				tmpViewsToInitialize.push(tmpView);
+				this.log.trace(`PictApp [${this.UUID}]::[${this.Hash}] ${this.options.Name} beginning initialization...`);
 			}
-		}
-		// Sort the views by their priority (if they are all priority 0, it will end up being add order due to JSON Object Property Key order stuff)
-		tmpViewsToInitialize.sort((a, b) => { return a.options.AutoInitializeOrdinal - b.options.AutoInitializeOrdinal; });
-		for (let i = 0; i < tmpViewsToInitialize.length; i++)
-		{
-			let tmpView = tmpViewsToInitialize[i];
-			tmpAnticipate.anticipate(tmpView.initializeAsync.bind(tmpView));
-		}
-		tmpAnticipate.anticipate(this.onAfterInitializeAsync.bind(this));
 
-		tmpAnticipate.wait(
-			(pError) =>
+			tmpAnticipate.anticipate(this.onBeforeInitializeAsync.bind(this));
+			tmpAnticipate.anticipate(this.onInitializeAsync.bind(this));
+			// Now walk through any loaded views and initialize them as well.
+			// TODO: Some optimization cleverness could be gained by grouping them into a parallelized async operation, by ordinal.
+			let tmpLoadedViews = Object.keys(this.pict.views);
+			let tmpViewsToInitialize = [];
+			for (let i = 0; i < tmpLoadedViews.length; i++)
 			{
-				if (this.pict.LogNoisiness > 2)
+				let tmpView = this.pict.views[tmpLoadedViews[i]];
+				if (tmpView.options.AutoInitialize)
 				{
-					this.log.trace(`PictApp [${this.UUID}]::[${this.Hash}] ${this.options.Name} initialization complete.`);
+					tmpViewsToInitialize.push(tmpView);
 				}
-				return fCallBack();
-			});
+			}
+			// Sort the views by their priority (if they are all priority 0, it will end up being add order due to JSON Object Property Key order stuff)
+			tmpViewsToInitialize.sort((a, b) => { return a.options.AutoInitializeOrdinal - b.options.AutoInitializeOrdinal; });
+			for (let i = 0; i < tmpViewsToInitialize.length; i++)
+			{
+				let tmpView = tmpViewsToInitialize[i];
+				tmpAnticipate.anticipate(tmpView.initializeAsync.bind(tmpView));
+			}
+			tmpAnticipate.anticipate(this.onAfterInitializeAsync.bind(this));
+
+			tmpAnticipate.wait(
+				(pError) =>
+				{
+					this.initializeTimestamp = this.fable.log.getTimeStamp();
+					if (this.pict.LogNoisiness > 2)
+					{
+						this.log.trace(`PictApp [${this.UUID}]::[${this.Hash}] ${this.options.Name} initialization complete.`);
+					}
+					return fCallBack();
+				});
+		}
+		else
+		{
+			this.log.warn(`PictApp [${this.UUID}]::[${this.Hash}] ${this.options.Name} async initialize called but initialization is already completed.  Aborting.`);
+			// TODO: Should this be an error?
+			return fCallback();
+		}
 	}
 
 	onAfterInitialize()
@@ -271,10 +290,7 @@ class PictApplication extends libFableServiceBase
 		let tmpView = (typeof (pViewHash) === 'string') ? this.servicesMap.PictView[pViewHash] : false;
 		if (!tmpView)
 		{
-			if (this.pict.LogNoisiness > 3)
-			{
-				this.log.error(`PictApp [${this.UUID}]::[${this.Hash}] ${this.options.Name} could not render from View ${pViewHash} because it is not a valid view.`);
-			}
+			this.log.error(`PictApp [${this.UUID}]::[${this.Hash}] ${this.options.Name} could not render from View ${pViewHash} because it is not a valid view.`);
 			return false;
 		}
 
