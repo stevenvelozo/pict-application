@@ -1,15 +1,13 @@
-# Pict View: PictApplication
+# Pict Application
 
-This is a subclassed Pict View, PictApplication.
-
-It does stuff.
+It does stuff. With stuff.  More to come.
 
 # Usage
 
 ```js
 const libPict = require('pict');
 
-let tmpView = libPict.addView({Options:"Set here"}, "PictApplication-Hash", require(pict-application));
+let tmpView = libPict.addView("PictApplication-Hash", {Options:"Set here"}, require(pict-application));
 
 tmpView.render();
 ```

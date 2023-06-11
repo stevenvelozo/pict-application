@@ -15,7 +15,7 @@ const libPictApplication = require(`../source/Pict-Application.js`);
 
 const libPictView = require('pict-view');
 
-const libSimpleAsyncView = require('./views/PictView-SimpleAsync.js');
+const libSimpleAsyncView = require('../example_applications/simple/PictView-Simple-AsyncExercises.js');
 
 suite
 (
@@ -35,7 +35,7 @@ suite
 							{
 								let _Pict = new libPict();
 								let _PictEnvironment = new libPict.EnvironmentLog(_Pict);
-								let _PictApplication = _Pict.addApplication({}, 'Pict-PictApplication',  libPictApplication);
+								let _PictApplication = _Pict.addApplication('Pict-PictApplication', {}, libPictApplication);
 								Expect(_PictApplication).to.be.an('object');
 								_PictApplication.initialize();
 								return fDone();
@@ -47,7 +47,7 @@ suite
 							{
 								let _Pict = new libPict();
 								let _PictEnvironment = new libPict.EnvironmentLog(_Pict);
-								let _PictApplication = _Pict.addApplication({}, 'Pict-PictApplication',  libPictApplication);
+								let _PictApplication = _Pict.addApplication('Pict-PictApplication', {}, libPictApplication);
 
 								_Pict.addView({}, 'Pict-View', libPictView);
 								_PictApplication.initialize();
@@ -61,7 +61,7 @@ suite
 							{
 								let _Pict = new libPict();
 								let _PictEnvironment = new libPict.EnvironmentLog(_Pict);
-								let _PictApplication = _Pict.addApplication({}, 'Pict-PictApplication',  libPictApplication);
+								let _PictApplication = _Pict.addApplication('Pict-PictApplication', {}, libPictApplication);
 
 								_Pict.addView({}, 'Pict-View', libPictView);
 								_PictApplication.initialize();
@@ -75,8 +75,9 @@ suite
 							(fDone) =>
 							{
 								let _Pict = new libPict();
+								_Pict.LogNoisiness = 5;
 								let _PictEnvironment = new libPict.EnvironmentLog(_Pict);
-								let _PictApplication = _Pict.addApplication({}, 'Pict-PictApplication', libPictApplication);
+								let _PictApplication = _Pict.addApplication('Pict-PictApplication', {}, libPictApplication);
 
 								_Pict.addView({}, 'Pict-View-Async', libSimpleAsyncView);
 								_PictApplication.initializeAsync(
@@ -92,17 +93,18 @@ suite
 							(fDone) =>
 							{
 								let _Pict = new libPict();
+								_Pict.LogNoisiness = 1;
 								let _PictEnvironment = new libPict.EnvironmentLog(_Pict);
-								let _PictApplication = _Pict.addApplication({}, 'Pict-PictApplication',  libPictApplication);
+								let _PictApplication = _Pict.addApplication('Pict-PictApplication',  {}, libPictApplication);
 
-								for (let i = 0; i < 10; i++)
+								for (let i = 0; i < 2; i++)
 								{
-									_Pict.addView({}, `Pict-View-Async-0${i}`, libSimpleAsyncView);
+									_Pict.addView(`Pict-View-Async-0${i}`, {}, libSimpleAsyncView);
 								}
-								_Pict.addView({AutoInitializeOrdinal: 1}, 'Pict-View', libPictView);
-								for (let i = 0; i < 10; i++)
+								_Pict.addView('Pict-View', {ViewIdentifier:'Deferred-View', AutoInitializeOrdinal: 1}, libPictView);
+								for (let i = 0; i < 2; i++)
 								{
-									_Pict.addView({}, `Pict-View-Async-1${i}`, libSimpleAsyncView);
+									_Pict.addView(`Pict-View-Async-1${i}`, {}, libSimpleAsyncView);
 								}
 
 								_PictApplication.initializeAsync(

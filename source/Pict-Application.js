@@ -5,13 +5,14 @@ const defaultPictSettings = (
 		Name: 'DefaultPictApplication',
 
 		// The main "viewport" is the view that is used to host our application
-		MainViewportView: 'Default-View',
-		MainViewportRenderable: 'Application-Default-View-Renderable',
-		MainViewportDestinationAddress: 'Application-Destination-Address',
-		MainViewportDefaultDataAddress: '',
+		MainViewportViewIdentifier: 'Default-View',
+		MainViewportRenderableHash: false,
+		MainViewportDestinationAddress: false,
+		MainViewportDefaultDataAddress: false,
 
-		// Whether or not we should automatically render the main viewport when we initialize pict
-		AutoRenderMainViewportViewOnInitialize: false,
+		// Whether or not we should automatically render the main viewport after we initialize the pict application
+		AutoSolveAfterInitialize: true,
+		AutoRenderMainViewportViewAfterInitialize: true,
 
 		Manifests: {},
 		// The prefix to prepend on all template destination hashes
@@ -75,7 +76,6 @@ class PictApplication extends libFableServiceBase
 		return fCallback();
 	}
 
-	// TODO: do we need an asynchronous version of this?
 	solve()
 	{
 		if (this.pict.LogNoisiness > 2)
@@ -125,10 +125,10 @@ class PictApplication extends libFableServiceBase
 		tmpViewsToSolve.sort((a, b) => { return a.options.AutoSolveOrdinal - b.options.AutoSolveOrdinal; });
 		for (let i = 0; i < tmpViewsToSolve.length; i++)
 		{
-			tmpViewsToSolve[i].initialize();
+			tmpAnticipate.anticipate(tmpViewsToSolve[i].solveAsync.bind(tmpViewsToSolve[i]));
 		}
 		tmpAnticipate.anticipate(this.onSolveAsync.bind(this));
-		tmpAnticipate.anticipate(this.onAfterSolve.bind(this));
+		tmpAnticipate.anticipate(this.onAfterSolveAsync.bind(this));
 
 		tmpAnticipate.wait(
 			(pError) =>
@@ -172,7 +172,6 @@ class PictApplication extends libFableServiceBase
 
 	onInitialize()
 	{
-
 		if (this.pict.LogNoisiness > 3)
 		{
 			this.log.trace(`PictApp [${this.UUID}]::[${this.Hash}] ${this.options.Name} onInitialize:`);
@@ -209,6 +208,25 @@ class PictApplication extends libFableServiceBase
 				tmpViewsToInitialize[i].initialize();
 			}
 			this.onAfterInitialize();
+			if (this.options.AutoSolveAfterInitialize)
+			{
+				if (this.pict.LogNoisiness > 1)
+				{
+					this.log.trace(`PictApp [${this.UUID}]::[${this.Hash}] ${this.options.Name} auto solving after initialization...`);
+				}
+				// Solve the template synchronously
+				this.solve();
+			}
+			// Now check and see if we should automatically render as well
+			if (this.options.AutoRenderMainViewportViewAfterInitialize)
+			{
+				if (this.pict.LogNoisiness > 1)
+				{
+					this.log.trace(`PictApp [${this.UUID}]::[${this.Hash}] ${this.options.Name} auto rendering after initialization...`);
+				}
+				// Render the template synchronously
+				this.render();
+			}
 			this.initializeTimestamp = this.fable.log.getTimeStamp();
 			return true;
 		}
@@ -243,7 +261,8 @@ class PictApplication extends libFableServiceBase
 					tmpViewsToInitialize.push(tmpView);
 				}
 			}
-			// Sort the views by their priority (if they are all priority 0, it will end up being add order due to JSON Object Property Key order stuff)
+			// Sort the views by their priority
+			// If they are all the default priority 0, it will end up being add order due to JSON Object Property Key order stuff
 			tmpViewsToInitialize.sort((a, b) => { return a.options.AutoInitializeOrdinal - b.options.AutoInitializeOrdinal; });
 			for (let i = 0; i < tmpViewsToInitialize.length; i++)
 			{
@@ -251,6 +270,24 @@ class PictApplication extends libFableServiceBase
 				tmpAnticipate.anticipate(tmpView.initializeAsync.bind(tmpView));
 			}
 			tmpAnticipate.anticipate(this.onAfterInitializeAsync.bind(this));
+
+			if (this.options.AutoSolveAfterInitialize)
+			{
+				if (this.pict.LogNoisiness > 1)
+				{
+					this.log.trace(`PictApp [${this.UUID}]::[${this.Hash}] ${this.options.Name} auto solving (asynchronously) after initialization...`);
+				}
+				tmpAnticipate.anticipate(this.solveAsync.bind(this));
+			}
+
+			if (this.options.AutoRenderMainViewportViewAfterInitialize)
+			{
+				if (this.pict.LogNoisiness > 1)
+				{
+					this.log.trace(`PictApp [${this.UUID}]::[${this.Hash}] ${this.options.Name} auto rendering (asynchronously) after initialization...`);
+				}
+				tmpAnticipate.anticipate(this.renderMainViewportAsync.bind(this));
+			}
 
 			tmpAnticipate.wait(
 				(pError) =>
@@ -285,32 +322,51 @@ class PictApplication extends libFableServiceBase
 		return fCallback();
 	}
 
-	render(pViewHash, pRenderableHash, pRenderDestinationAddress, pTemplateDataAddress)
+	render(pViewIdentifier, pRenderableHash, pRenderDestinationAddress, pTemplateDataAddress)
 	{
-		let tmpView = (typeof (pViewHash) === 'string') ? this.servicesMap.PictView[pViewHash] : false;
+		let tmpViewIdentifier = (typeof(pViewIdentifier) === 'undefined') ? this.options.MainViewportViewIdentifier : pViewIdentifier;
+		let tmpRenderableHash = (typeof(pRenderableHash) === 'undefined') ? this.options.MainViewportRenderableHash : pRenderableHash;
+		let tmpRenderDestinationAddress = (typeof(pRenderDestinationAddress) === 'undefined') ? this.options.MainViewportDestinationAddress : pRenderDestinationAddress;
+		let tmpTemplateDataAddress = (typeof(pTemplateDataAddress) === 'undefined') ? this.options.MainViewportDefaultDataAddress : pTemplateDataAddress;
+
+		// Now get the view (by hash) from the loaded views
+		let tmpView = (typeof (tmpViewIdentifier) === 'string') ? this.servicesMap.PictView[tmpViewIdentifier] : false;
 		if (!tmpView)
 		{
-			this.log.error(`PictApp [${this.UUID}]::[${this.Hash}] ${this.options.Name} could not render from View ${pViewHash} because it is not a valid view.`);
+			this.log.error(`PictApp [${this.UUID}]::[${this.Hash}] ${this.options.Name} could not render from View ${tmpViewIdentifier} because it is not a valid view.`);
 			return false;
 		}
 
-
-		return tmpView.render(pRenderableHash, pRenderDestinationAddress, pTemplateDataAddress);
+		return tmpView.render(tmpRenderableHash, tmpRenderDestinationAddress, tmpTemplateDataAddress);
+	}
+	renderMainViewport()
+	{
+		return this.render(this.options.MainViewportViewIdentifier, this.options.MainViewportRenderableHash, this.options.MainViewportDestinationAddress, this.options.MainViewportDefaultDataAddress);
 	}
 
-	renderAsync(pViewHash, pRenderableHash, pRenderDestinationAddress, pTemplateDataAddress, fCallback)
+	renderAsync(pViewIdentifier, pRenderableHash, pRenderDestinationAddress, pTemplateDataAddress, fCallback)
 	{
-		let tmpView = (typeof (pViewHash) === 'string') ? this.servicesMap.PictView[pViewHash] : false;
+		let tmpViewIdentifier = (typeof(pViewIdentifier) === 'undefined') ? this.options.MainViewportViewIdentifier : pViewIdentifier;
+		let tmpRenderableHash = (typeof(pRenderableHash) === 'undefined') ? this.options.MainViewportRenderableHash : pRenderableHash;
+		let tmpRenderDestinationAddress = (typeof(pRenderDestinationAddress) === 'undefined') ? this.options.MainViewportDestinationAddress : pRenderDestinationAddress;
+		let tmpTemplateDataAddress = (typeof(pTemplateDataAddress) === 'undefined') ? this.options.MainViewportDefaultDataAddress : pTemplateDataAddress;
+
+		let tmpView = (typeof (tmpViewIdentifier) === 'string') ? this.servicesMap.PictView[tmpViewIdentifier] : false;
 		if (!tmpView)
 		{
+			let tmpErrorMessage = `PictApp [${this.UUID}]::[${this.Hash}] ${this.options.Name} could not asynchronously render from View ${tmpViewIdentifier} because it is not a valid view.`;
 			if (this.pict.LogNoisiness > 3)
 			{
-				this.log.error(`PictApp [${this.UUID}]::[${this.Hash}] ${this.options.Name} could not asynchronously render from View ${pViewHash} because it is not a valid view.`);
+				this.log.error(tmpErrorMessage);
 			}
-			return false;
+			return fCallback(new Error(tmpErrorMessage));
 		}
 
-		return tmpView.renderAsync(pRenderableHash, pRenderDestinationAddress, pTemplateDataAddress, fCallback);
+		return tmpView.renderAsync(tmpRenderableHash, tmpRenderDestinationAddress, tmpTemplateDataAddress, fCallback);
+	}
+	renderMainViewportAsync(fCallback)
+	{
+		return this.renderAsync(this.options.MainViewportViewIdentifier, this.options.MainViewportRenderableHash, this.options.MainViewportDestinationAddress, this.options.MainViewportDefaultDataAddress, fCallback);
 	}
 }
 
