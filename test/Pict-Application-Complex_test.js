@@ -56,6 +56,10 @@ suite
 
 								_PictApplication.initialize();
 
+								Expect(_PictApplication.lastMarshalFromViewsTimestamp).to.equal(false);
+								_PictApplication.marshalFromViews();
+								Expect(_PictApplication.lastMarshalFromViewsTimestamp).to.be.a('number');
+
 								// The default renderer should have done nothing
 								Expect(_PictEnvironment.eventLog.Assign.length).to.equal(0);
 

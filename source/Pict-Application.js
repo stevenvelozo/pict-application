@@ -34,6 +34,8 @@ class PictApplication extends libFableServiceBase
 
 		this.initializeTimestamp = false;
 		this.lastSolvedTimestamp = false;
+		this.lastMarshalFromViewsTimestamp = false;
+		this.lastMarshalToViewsTimestamp = false;
 
 		// Load all the manifests for the application
 		let tmpManifestKeys = Object.keys(this.options.Manifests);
@@ -48,6 +50,9 @@ class PictApplication extends libFableServiceBase
 		}
 	}
 
+	/* -------------------------------------------------------------------------- */
+	/*                     Code Section: Solve All Views                          */
+	/* -------------------------------------------------------------------------- */
 	onBeforeSolve()
 	{
 		if (this.pict.LogNoisiness > 3)
@@ -156,6 +161,9 @@ class PictApplication extends libFableServiceBase
 		return fCallback();
 	}
 
+	/* -------------------------------------------------------------------------- */
+	/*                     Code Section: Initialize Application                   */
+	/* -------------------------------------------------------------------------- */
 	onBeforeInitialize()
 	{
 		if (this.pict.LogNoisiness > 3)
@@ -322,6 +330,211 @@ class PictApplication extends libFableServiceBase
 		return fCallback();
 	}
 
+	/* -------------------------------------------------------------------------- */
+	/*                     Code Section: Marshal Data From All Views              */
+	/* -------------------------------------------------------------------------- */
+	onBeforeMarshalFromViews()
+	{
+		if (this.pict.LogNoisiness > 3)
+		{
+			this.log.trace(`PictApp [${this.UUID}]::[${this.Hash}] ${this.options.Name} onBeforeMarshalFromViews:`);
+		}
+		return true;
+	}
+	onBeforeMarshalFromViewsAsync(fCallback)
+	{
+		this.onBeforeMarshalFromViews();
+		return fCallback();
+	}
+
+	onMarshalFromViews()
+	{
+		if (this.pict.LogNoisiness > 3)
+		{
+			this.log.trace(`PictApp [${this.UUID}]::[${this.Hash}] ${this.options.Name} onMarshalFromViews:`);
+		}
+		return true;
+	}
+	onMarshalFromViewsAsync(fCallback)
+	{
+		this.onMarshalFromViews();
+		return fCallback();
+	}
+
+	marshalFromViews()
+	{
+		if (this.pict.LogNoisiness > 2)
+		{
+			this.log.trace(`PictApp [${this.UUID}]::[${this.Hash}] ${this.options.Name} executing marshalFromViews() function...`)
+		}
+		this.onBeforeMarshalFromViews();
+		// Now walk through any loaded views and initialize them as well.
+		let tmpLoadedViews = Object.keys(this.pict.views);
+		let tmpViewsToMarshalFromViews = [];
+		for (let i = 0; i < tmpLoadedViews.length; i++)
+		{
+			let tmpView = this.pict.views[tmpLoadedViews[i]];
+			tmpViewsToMarshalFromViews.push(tmpView);
+		}
+		for (let i = 0; i < tmpViewsToMarshalFromViews.length; i++)
+		{
+			tmpViewsToMarshalFromViews[i].marshalFromView();
+		}
+		this.onMarshalFromViews();
+		this.onAfterMarshalFromViews();
+		this.lastMarshalFromViewsTimestamp = this.fable.log.getTimeStamp();
+		return true;
+	}
+	marshalFromViewsAsync(fCallback)
+	{
+		let tmpAnticipate = this.fable.serviceManager.instantiateServiceProviderWithoutRegistration('Anticipate');
+
+		tmpAnticipate.anticipate(this.onBeforeMarshalFromViewsAsync.bind(this));
+		// Walk through any loaded views and marshalFromViews them as well.
+		let tmpLoadedViews = Object.keys(this.pict.views);
+		let tmpViewsToMarshalFromViews = [];
+		for (let i = 0; i < tmpLoadedViews.length; i++)
+		{
+			let tmpView = this.pict.views[tmpLoadedViews[i]];
+			tmpViewsToMarshalFromViews.push(tmpView);
+		}
+		for (let i = 0; i < tmpViewsToMarshalFromViews.length; i++)
+		{
+			tmpAnticipate.anticipate(tmpViewsToMarshalFromViews[i].marshalFromViewAsync.bind(tmpViewsToMarshalFromViews[i]));
+		}
+		tmpAnticipate.anticipate(this.onMarshalFromViewsAsync.bind(this));
+		tmpAnticipate.anticipate(this.onAfterMarshalFromViewsAsync.bind(this));
+
+		tmpAnticipate.wait(
+			(pError) =>
+			{
+				if (this.pict.LogNoisiness > 2)
+				{
+					this.log.trace(`PictApp [${this.UUID}]::[${this.Hash}] ${this.options.Name} marshalFromViewsAsync() complete.`);
+				}
+				this.lastMarshalFromViewsTimestamp = this.fable.log.getTimeStamp();
+				return fCallback(pError);
+			});
+	}
+
+	onAfterMarshalFromViews()
+	{
+		if (this.pict.LogNoisiness > 3)
+		{
+			this.log.trace(`PictApp [${this.UUID}]::[${this.Hash}] ${this.options.Name} onAfterMarshalFromViews:`);
+		}
+		return true;
+	}
+	onAfterMarshalFromViewsAsync(fCallback)
+	{
+		this.onAfterMarshalFromViews();
+		return fCallback();
+	}
+
+	/* -------------------------------------------------------------------------- */
+	/*                     Code Section: Marshal Data To All Views                */
+	/* -------------------------------------------------------------------------- */
+	onBeforeMarshalToViews()
+	{
+		if (this.pict.LogNoisiness > 3)
+		{
+			this.log.trace(`PictApp [${this.UUID}]::[${this.Hash}] ${this.options.Name} onBeforeMarshalToViews:`);
+		}
+		return true;
+	}
+	onBeforeMarshalToViewsAsync(fCallback)
+	{
+		this.onBeforeMarshalToViews();
+		return fCallback();
+	}
+
+	onMarshalToViews()
+	{
+		if (this.pict.LogNoisiness > 3)
+		{
+			this.log.trace(`PictApp [${this.UUID}]::[${this.Hash}] ${this.options.Name} onMarshalToViews:`);
+		}
+		return true;
+	}
+	onMarshalToViewsAsync(fCallback)
+	{
+		this.onMarshalToViews();
+		return fCallback();
+	}
+
+	marshalToViews()
+	{
+		if (this.pict.LogNoisiness > 2)
+		{
+			this.log.trace(`PictApp [${this.UUID}]::[${this.Hash}] ${this.options.Name} executing marshalToViews() function...`)
+		}
+		this.onBeforeMarshalToViews();
+		// Now walk through any loaded views and initialize them as well.
+		let tmpLoadedViews = Object.keys(this.pict.views);
+		let tmpViewsToMarshalToViews = [];
+		for (let i = 0; i < tmpLoadedViews.length; i++)
+		{
+			let tmpView = this.pict.views[tmpLoadedViews[i]];
+			tmpViewsToMarshalToViews.push(tmpView);
+		}
+		for (let i = 0; i < tmpViewsToMarshalToViews.length; i++)
+		{
+			tmpViewsToMarshalToViews[i].marshalToView();
+		}
+		this.onMarshalToViews();
+		this.onAfterMarshalToViews();
+		this.lastMarshalToViewsTimestamp = this.fable.log.getTimeStamp();
+		return true;
+	}
+	marshalToViewsAsync(fCallback)
+	{
+		let tmpAnticipate = this.fable.serviceManager.instantiateServiceProviderWithoutRegistration('Anticipate');
+
+		tmpAnticipate.anticipate(this.onBeforeMarshalToViewsAsync.bind(this));
+		// Walk through any loaded views and marshalToViews them as well.
+		let tmpLoadedViews = Object.keys(this.pict.views);
+		let tmpViewsToMarshalToViews = [];
+		for (let i = 0; i < tmpLoadedViews.length; i++)
+		{
+			let tmpView = this.pict.views[tmpLoadedViews[i]];
+			tmpViewsToMarshalToViews.push(tmpView);
+		}
+		for (let i = 0; i < tmpViewsToMarshalToViews.length; i++)
+		{
+			tmpAnticipate.anticipate(tmpViewsToMarshalToViews[i].marshalToViewAsync.bind(tmpViewsToMarshalToViews[i]));
+		}
+		tmpAnticipate.anticipate(this.onMarshalToViewsAsync.bind(this));
+		tmpAnticipate.anticipate(this.onAfterMarshalToViewsAsync.bind(this));
+
+		tmpAnticipate.wait(
+			(pError) =>
+			{
+				if (this.pict.LogNoisiness > 2)
+				{
+					this.log.trace(`PictApp [${this.UUID}]::[${this.Hash}] ${this.options.Name} marshalToViewsAsync() complete.`);
+				}
+				this.lastMarshalToViewsTimestamp = this.fable.log.getTimeStamp();
+				return fCallback(pError);
+			});
+	}
+
+	onAfterMarshalToViews()
+	{
+		if (this.pict.LogNoisiness > 3)
+		{
+			this.log.trace(`PictApp [${this.UUID}]::[${this.Hash}] ${this.options.Name} onAfterMarshalToViews:`);
+		}
+		return true;
+	}
+	onAfterMarshalToViewsAsync(fCallback)
+	{
+		this.onAfterMarshalToViews();
+		return fCallback();
+	}
+
+	/* -------------------------------------------------------------------------- */
+	/*                     Code Section: Render View                              */
+	/* -------------------------------------------------------------------------- */
 	render(pViewIdentifier, pRenderableHash, pRenderDestinationAddress, pTemplateDataAddress)
 	{
 		let tmpViewIdentifier = (typeof(pViewIdentifier) === 'undefined') ? this.options.MainViewportViewIdentifier : pViewIdentifier;
