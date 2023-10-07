@@ -45,7 +45,7 @@ class PictApplication extends libFableServiceBase
 			{
 				// Load each manifest
 				let tmpManifestKey = tmpManifestKeys[i];
-				this.fable.serviceManager.instantiateServiceProvider('Manifest', this.options.Manifests[tmpManifestKey], tmpManifestKey);
+				this.fable.instantiateServiceProvider('Manifest', this.options.Manifests[tmpManifestKey], tmpManifestKey);
 			}
 		}
 	}
@@ -112,7 +112,7 @@ class PictApplication extends libFableServiceBase
 	}
 	solveAsync(fCallback)
 	{
-		let tmpAnticipate = this.fable.serviceManager.instantiateServiceProviderWithoutRegistration('Anticipate');
+		let tmpAnticipate = this.fable.instantiateServiceProviderWithoutRegistration('Anticipate');
 
 		tmpAnticipate.anticipate(this.onBeforeSolveAsync.bind(this));
 		// Walk through any loaded views and solve them as well.
@@ -248,7 +248,7 @@ class PictApplication extends libFableServiceBase
 	{
 		if (!this.initializeTimestamp)
 		{
-			let tmpAnticipate = this.fable.serviceManager.instantiateServiceProviderWithoutRegistration('Anticipate');
+			let tmpAnticipate = this.fable.instantiateServiceProviderWithoutRegistration('Anticipate');
 
 			if (this.pict.LogNoisiness > 3)
 			{
@@ -387,7 +387,7 @@ class PictApplication extends libFableServiceBase
 	}
 	marshalFromViewsAsync(fCallback)
 	{
-		let tmpAnticipate = this.fable.serviceManager.instantiateServiceProviderWithoutRegistration('Anticipate');
+		let tmpAnticipate = this.fable.instantiateServiceProviderWithoutRegistration('Anticipate');
 
 		tmpAnticipate.anticipate(this.onBeforeMarshalFromViewsAsync.bind(this));
 		// Walk through any loaded views and marshalFromViews them as well.
@@ -488,7 +488,7 @@ class PictApplication extends libFableServiceBase
 	}
 	marshalToViewsAsync(fCallback)
 	{
-		let tmpAnticipate = this.fable.serviceManager.instantiateServiceProviderWithoutRegistration('Anticipate');
+		let tmpAnticipate = this.fable.instantiateServiceProviderWithoutRegistration('Anticipate');
 
 		tmpAnticipate.anticipate(this.onBeforeMarshalToViewsAsync.bind(this));
 		// Walk through any loaded views and marshalToViews them as well.

@@ -51,64 +51,67 @@ function _toPrimitive(input, hint) { if (typeof input !== "object" || input === 
   }()({
     1: [function (require, module, exports) {
       /**
-      * Fable Core Pre-initialization Service Base
-      *
-      * For a couple services, we need to be able to instantiate them before the Fable object is fully initialized.
-      * This is a base class for those services.
-      *
-      * @author <steven@velozo.com>
-      */
-
-      class FableCoreServiceProviderBase {
-        constructor(pOptions, pServiceHash) {
-          this.fable = false;
-          this.options = typeof pOptions === 'object' ? pOptions : {};
-          this.serviceType = 'Unknown';
-
-          // The hash will be a non-standard UUID ... the UUID service uses this base class!
-          this.UUID = "CORESVC-".concat(Math.floor(Math.random() * (99999 - 10000) + 10000));
-          this.Hash = typeof pServiceHash === 'string' ? pServiceHash : "".concat(this.UUID);
-        }
-        // After fable is initialized, it would be expected to be wired in as a normal service.
-        connectFable(pFable) {
-          this.fable = pFable;
-          return true;
-        }
-      }
-      _defineProperty(FableCoreServiceProviderBase, "isFableService", true);
-      module.exports = FableCoreServiceProviderBase;
-    }, {}],
-    2: [function (require, module, exports) {
-      /**
       * Fable Service Base
       * @author <steven@velozo.com>
       */
 
       class FableServiceProviderBase {
+        // The constructor can be used in two ways:
+        // 1) With a fable, options object and service hash (the options object and service hash are optional)
+        // 2) With an object or nothing as the first parameter, where it will be treated as the options object
         constructor(pFable, pOptions, pServiceHash) {
-          this.fable = pFable;
-          this.options = typeof pOptions === 'object' ? pOptions : typeof pFable === 'object' && !pFable.isFable ? pFable : {};
-          this.serviceType = 'Unknown';
-          if (typeof pFable.getUUID == 'function') {
-            this.UUID = pFable.getUUID();
+          // Check if a fable was passed in; connect it if so
+          if (typeof pFable === 'object' && pFable.isFable) {
+            this.connectFable(pFable);
           } else {
-            this.UUID = "NoFABLESVC-".concat(Math.floor(Math.random() * (99999 - 10000) + 10000));
+            this.fable = false;
           }
-          this.Hash = typeof pServiceHash === 'string' ? pServiceHash : "".concat(this.UUID);
 
-          // Pull back a few things
-          this.log = this.fable.log;
-          this.servicesMap = this.fable.servicesMap;
-          this.services = this.fable.services;
+          // initialize options and UUID based on whether the fable was passed in or not.
+          if (this.fable) {
+            this.UUID = pFable.getUUID();
+            this.options = typeof pOptions === 'object' ? pOptions : {};
+          } else {
+            // With no fable, check to see if there was an object passed into either of the first two
+            // Parameters, and if so, treat it as the options object
+            this.options = typeof pFable === 'object' && !pFable.isFable ? pFable : typeof pOptions === 'object' ? pOptions : {};
+            this.UUID = "CORE-SVC-".concat(Math.floor(Math.random() * (99999 - 10000) + 10000));
+          }
+
+          // It's expected that the deriving class will set this
+          this.serviceType = "Unknown-".concat(this.UUID);
+
+          // The service hash is used to identify the specific instantiation of the service in the services map
+          this.Hash = typeof pServiceHash === 'string' ? pServiceHash : !this.fable && typeof pOptions === 'string' ? pOptions : "".concat(this.UUID);
+        }
+        connectFable(pFable) {
+          if (typeof pFable !== 'object' || !pFable.isFable) {
+            let tmpErrorMessage = "Fable Service Provider Base: Cannot connect to Fable, invalid Fable object passed in.  The pFable parameter was a [".concat(typeof pFable, "].}");
+            console.log(tmpErrorMessage);
+            return new Error(tmpErrorMessage);
+          }
+          if (!this.fable) {
+            this.fable = pFable;
+          }
+          if (!this.log) {
+            this.log = this.fable.Logging;
+          }
+          if (!this.services) {
+            this.services = this.fable.services;
+          }
+          if (!this.servicesMap) {
+            this.servicesMap = this.fable.servicesMap;
+          }
+          return true;
         }
       }
       _defineProperty(FableServiceProviderBase, "isFableService", true);
       module.exports = FableServiceProviderBase;
-      module.exports.CoreServiceProviderBase = require('./Fable-ServiceProviderBase-Preinit.js');
-    }, {
-      "./Fable-ServiceProviderBase-Preinit.js": 1
-    }],
-    3: [function (require, module, exports) {
+
+      // This is left here in case we want to go back to having different code/base class for "core" services
+      module.exports.CoreServiceProviderBase = FableServiceProviderBase;
+    }, {}],
+    2: [function (require, module, exports) {
       const libFableServiceBase = require('fable-serviceproviderbase');
       const defaultPictSettings = {
         Name: 'DefaultPictApplication',
@@ -145,7 +148,7 @@ function _toPrimitive(input, hint) { if (typeof input !== "object" || input === 
             for (let i = 0; i < tmpManifestKeys.length; i++) {
               // Load each manifest
               let tmpManifestKey = tmpManifestKeys[i];
-              this.fable.serviceManager.instantiateServiceProvider('Manifest', this.options.Manifests[tmpManifestKey], tmpManifestKey);
+              this.fable.instantiateServiceProvider('Manifest', this.options.Manifests[tmpManifestKey], tmpManifestKey);
             }
           }
         }
@@ -200,7 +203,7 @@ function _toPrimitive(input, hint) { if (typeof input !== "object" || input === 
           return true;
         }
         solveAsync(fCallback) {
-          let tmpAnticipate = this.fable.serviceManager.instantiateServiceProviderWithoutRegistration('Anticipate');
+          let tmpAnticipate = this.fable.instantiateServiceProviderWithoutRegistration('Anticipate');
           tmpAnticipate.anticipate(this.onBeforeSolveAsync.bind(this));
           // Walk through any loaded views and solve them as well.
           let tmpLoadedViews = Object.keys(this.pict.views);
@@ -307,7 +310,7 @@ function _toPrimitive(input, hint) { if (typeof input !== "object" || input === 
         }
         initializeAsync(fCallBack) {
           if (!this.initializeTimestamp) {
-            let tmpAnticipate = this.fable.serviceManager.instantiateServiceProviderWithoutRegistration('Anticipate');
+            let tmpAnticipate = this.fable.instantiateServiceProviderWithoutRegistration('Anticipate');
             if (this.pict.LogNoisiness > 3) {
               this.log.trace("PictApp [".concat(this.UUID, "]::[").concat(this.Hash, "] ").concat(this.options.Name, " beginning initialization..."));
             }
@@ -413,7 +416,7 @@ function _toPrimitive(input, hint) { if (typeof input !== "object" || input === 
           return true;
         }
         marshalFromViewsAsync(fCallback) {
-          let tmpAnticipate = this.fable.serviceManager.instantiateServiceProviderWithoutRegistration('Anticipate');
+          let tmpAnticipate = this.fable.instantiateServiceProviderWithoutRegistration('Anticipate');
           tmpAnticipate.anticipate(this.onBeforeMarshalFromViewsAsync.bind(this));
           // Walk through any loaded views and marshalFromViews them as well.
           let tmpLoadedViews = Object.keys(this.pict.views);
@@ -490,7 +493,7 @@ function _toPrimitive(input, hint) { if (typeof input !== "object" || input === 
           return true;
         }
         marshalToViewsAsync(fCallback) {
-          let tmpAnticipate = this.fable.serviceManager.instantiateServiceProviderWithoutRegistration('Anticipate');
+          let tmpAnticipate = this.fable.instantiateServiceProviderWithoutRegistration('Anticipate');
           tmpAnticipate.anticipate(this.onBeforeMarshalToViewsAsync.bind(this));
           // Walk through any loaded views and marshalToViews them as well.
           let tmpLoadedViews = Object.keys(this.pict.views);
@@ -564,7 +567,7 @@ function _toPrimitive(input, hint) { if (typeof input !== "object" || input === 
       }
       module.exports = PictApplication;
     }, {
-      "fable-serviceproviderbase": 2
+      "fable-serviceproviderbase": 1
     }]
-  }, {}, [3])(3);
+  }, {}, [2])(2);
 });
