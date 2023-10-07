@@ -1,6 +1,6 @@
 {
     "name": "pict-application",
-    "version": "1.0.10",
+    "version": "1.0.11",
     "description": "",
     "main": "source/Pict-Application.js",
     "scripts": {
