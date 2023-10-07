@@ -24,7 +24,7 @@
     "homepage": "https://github.com/stevenvelozo/pict-application#readme",
     "devDependencies": {
         "browser-env": "^3.3.0",
-        "pict": "^1.0.125",
+        "pict": "^1.0.126",
         "pict-view": "^1.0.30",
         "quackage": "^1.0.22"
     },
