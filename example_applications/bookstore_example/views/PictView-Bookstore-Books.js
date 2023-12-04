@@ -58,29 +58,21 @@ class BookstoreBooksView extends libPictView
 		super(pFable, pOptions, pServiceHash);
 	}
 
-	onBeforeInitialize()
+	onAfterInitializeAsync(fCallback)
 	{
-		super.onBeforeInitialize();
+		return this.loadBooks(0, 100, fCallback);
+	}
 
-		this.log.trace(`Loading Mock Book Database`);
+	loadBooks(pRecordCursorStart, pPageSize, fCallback)
+	{
+		// This is a configuration-only view; this code is here to aid in tweaking stuff for live testing
+		let tmpURL = `Books/${pRecordCursorStart}/${pPageSize}`;
 
-		this.AppData.MockDatabase = {};
-
-		this.AppData.MockDatabase.Book = require('../data/bookstore-Book.json');
-		this.log.trace(`Loaded ${this.AppData.MockDatabase.Book.length} Books`);
-
-		this.AppData.MockDatabase.Author = require('../data/bookstore-Author.json');
-		this.log.trace(`Loaded ${this.AppData.MockDatabase.Author.length} Authors`);
-
-		this.AppData.MockDatabase.BookAuthorJoin = require('../data/bookstore-BookAuthorJoin.json');
-		this.log.trace(`Loaded ${this.AppData.MockDatabase.BookAuthorJoin.length} Book to Author Joins`);
-
-		this.AppData.CurrentBookList = [];
-
-		for (let i = 0; i < 100; i++)
-		{
-			this.AppData.CurrentBookList.push(this.AppData.MockDatabase.Book[i]);
-		}
+		this.fable.RestClient.getJSON(tmpURL,
+			(pError, pResponse, pBody) =>
+			{
+				this.AppData.currentBridgeList = pBody;
+			});
 	}
 }
 

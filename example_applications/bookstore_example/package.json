@@ -1,40 +1,13 @@
 {
     "name": "bookstore_example",
     "version": "1.0.0",
-    "description": "",
+    "description": "Bookstore example pict web app.",
     "main": "Pict-Application-Bookstore.js",
     "scripts": {
-        "test": "echo \"Error: no test specified\" && exit 1",
         "start": "node Pict-Application-Bookstore.js",
-        "tests": "npx mocha -u tdd --exit -R spec --grep",
-        "coverage": "npx nyc --reporter=lcov --reporter=text-lcov ./node_modules/mocha/bin/_mocha -- -u tdd -R spec",
-        "build": "npx quack build && mkdir build && cp -R ./html/* ./build/ && cp ./dist/* ./build/",
-        "docker-dev-build": "docker build ./ -f Dockerfile_LUXURYCode -t bookstore_example-image:local",
-        "docker-dev-run": "docker run -it -d --name bookstore_example-dev -p 18025:8080 -p 11101:8086 -v \"$PWD/.config:/home/coder/.config\"  -v \"$PWD:/home/coder/bookstore_example\" -u \"$(id -u):$(id -g)\" -e \"DOCKER_USER=$USER\" bookstore_example-image:local",
-        "docker-dev-shell": "docker exec -it bookstore_example-dev /bin/bash"
+        "build": "npx quack build"
     },
     "author": "",
     "license": "MIT",
-    "mocha": {
-        "diff": true,
-        "extension": [
-            "js"
-        ],
-        "package": "./package.json",
-        "reporter": "spec",
-        "slow": "75",
-        "timeout": "5000",
-        "ui": "tdd",
-        "watch-files": [
-            "source/**/*.js",
-            "test/**/*.js"
-        ],
-        "watch-ignore": [
-            "lib/vendor"
-        ]
-    },
-    "devDependencies": {
-        "cpy-cli": "^5.0.0",
-        "quackage": "^1.0.22"
-    }
+    "devDependencies": {}
 }
