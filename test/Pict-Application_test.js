@@ -56,6 +56,21 @@ suite
 							}
 						);
 					test(
+							'Simple View Initialization with control flow logged out (for wkhtmltopdf etc.)',
+							(fDone) =>
+							{
+								let _Pict = new libPict();
+								_Pict.LogControlFlow = true;
+								let _PictEnvironment = new libPict.EnvironmentLog(_Pict);
+								let _PictApplication = _Pict.addApplication('Pict-PictApplication', {}, libPictApplication);
+
+								_Pict.addView({}, 'Pict-View', libPictView);
+								_PictApplication.initialize();
+
+								return fDone();
+							}
+						);
+					test(
 							'Simple View double Initialization',
 							(fDone) =>
 							{

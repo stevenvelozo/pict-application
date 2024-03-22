@@ -194,6 +194,11 @@ class PictApplication extends libFableServiceBase
 
 	initialize()
 	{
+		if (this.pict.LogControlFlow)
+		{
+			this.log.trace(`PICT-ControlFlow APPLICATION [${this.UUID}]::[${this.Hash}] ${this.options.Name} initialize:`);
+		}
+
 		if (!this.initializeTimestamp)
 		{
 			this.onBeforeInitialize();
@@ -246,6 +251,11 @@ class PictApplication extends libFableServiceBase
 	}
 	initializeAsync(fCallBack)
 	{
+		if (this.pict.LogControlFlow)
+		{
+			this.log.trace(`PICT-ControlFlow APPLICATION [${this.UUID}]::[${this.Hash}] ${this.options.Name} initializeAsync:`);
+		}
+
 		if (!this.initializeTimestamp)
 		{
 			let tmpAnticipate = this.fable.instantiateServiceProviderWithoutRegistration('Anticipate');
@@ -542,6 +552,11 @@ class PictApplication extends libFableServiceBase
 		let tmpRenderDestinationAddress = (typeof(pRenderDestinationAddress) === 'undefined') ? this.options.MainViewportDestinationAddress : pRenderDestinationAddress;
 		let tmpTemplateDataAddress = (typeof(pTemplateDataAddress) === 'undefined') ? this.options.MainViewportDefaultDataAddress : pTemplateDataAddress;
 
+		if (this.pict.LogControlFlow)
+		{
+			this.log.trace(`PICT-ControlFlow APPLICATION [${this.UUID}]::[${this.Hash}] ${this.options.Name} VIEW Renderable[${tmpRenderableHash}] Destination[${tmpRenderDestinationAddress}] TemplateDataAddress[${tmpTemplateDataAddress}] render:`);
+		}
+
 		// Now get the view (by hash) from the loaded views
 		let tmpView = (typeof (tmpViewIdentifier) === 'string') ? this.servicesMap.PictView[tmpViewIdentifier] : false;
 		if (!tmpView)
@@ -554,6 +569,11 @@ class PictApplication extends libFableServiceBase
 	}
 	renderMainViewport()
 	{
+		if (this.pict.LogControlFlow)
+		{
+			this.log.trace(`PICT-ControlFlow APPLICATION [${this.UUID}]::[${this.Hash}] ${this.options.Name} renderMainViewport:`);
+		}
+
 		return this.render(this.options.MainViewportViewIdentifier, this.options.MainViewportRenderableHash, this.options.MainViewportDestinationAddress, this.options.MainViewportDefaultDataAddress);
 	}
 
@@ -563,6 +583,11 @@ class PictApplication extends libFableServiceBase
 		let tmpRenderableHash = (typeof(pRenderableHash) === 'undefined') ? this.options.MainViewportRenderableHash : pRenderableHash;
 		let tmpRenderDestinationAddress = (typeof(pRenderDestinationAddress) === 'undefined') ? this.options.MainViewportDestinationAddress : pRenderDestinationAddress;
 		let tmpTemplateDataAddress = (typeof(pTemplateDataAddress) === 'undefined') ? this.options.MainViewportDefaultDataAddress : pTemplateDataAddress;
+
+		if (this.pict.LogControlFlow)
+		{
+			this.log.trace(`PICT-ControlFlow APPLICATION [${this.UUID}]::[${this.Hash}] ${this.options.Name} VIEW Renderable[${tmpRenderableHash}] Destination[${tmpRenderDestinationAddress}] TemplateDataAddress[${tmpTemplateDataAddress}] renderAsync:`);
+		}
 
 		let tmpView = (typeof (tmpViewIdentifier) === 'string') ? this.servicesMap.PictView[tmpViewIdentifier] : false;
 		if (!tmpView)
@@ -579,6 +604,11 @@ class PictApplication extends libFableServiceBase
 	}
 	renderMainViewportAsync(fCallback)
 	{
+		if (this.pict.LogControlFlow)
+		{
+			this.log.trace(`PICT-ControlFlow APPLICATION [${this.UUID}]::[${this.Hash}] ${this.options.Name} renderMainViewportAsync:`);
+		}
+
 		return this.renderAsync(this.options.MainViewportViewIdentifier, this.options.MainViewportRenderableHash, this.options.MainViewportDestinationAddress, this.options.MainViewportDefaultDataAddress, fCallback);
 	}
 }
