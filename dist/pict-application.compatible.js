@@ -176,6 +176,20 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
         /*                     Code Section: Solve All Views                          */
         /* -------------------------------------------------------------------------- */
         _createClass(PictApplication, [{
+          key: "onPreSolve",
+          value: function onPreSolve() {
+            if (this.pict.LogNoisiness > 3) {
+              this.log.trace("PictApp [".concat(this.UUID, "]::[").concat(this.Hash, "] ").concat(this.options.Name, " onPreSolve:"));
+            }
+            return true;
+          }
+        }, {
+          key: "onPreSolveAsync",
+          value: function onPreSolveAsync(fCallback) {
+            this.onPreSolve();
+            return fCallback();
+          }
+        }, {
           key: "onBeforeSolve",
           value: function onBeforeSolve() {
             if (this.pict.LogNoisiness > 3) {
@@ -209,12 +223,29 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
             if (this.pict.LogNoisiness > 2) {
               this.log.trace("PictApp [".concat(this.UUID, "]::[").concat(this.Hash, "] ").concat(this.options.Name, " executing solve() function..."));
             }
+
+            // Walk through any loaded providers and solve them as well.
+            var tmpLoadedProviders = Object.keys(this.pict.providers);
+            var tmpProvidersToSolve = [];
+            for (var i = 0; i < tmpLoadedProviders.length; i++) {
+              var tmpProvider = this.pict.providers[tmpLoadedProviders[i]];
+              if (tmpProvider.options.AutoSolveWithApp) {
+                tmpProvidersToSolve.push(tmpProvider);
+              }
+            }
+            // Sort the views by their priority (if they are all priority 0, it will end up being add order due to JSON Object Property Key order stuff)
+            tmpProvidersToSolve.sort(function (a, b) {
+              return a.options.AutoSolveOrdinal - b.options.AutoSolveOrdinal;
+            });
+            for (var _i = 0; _i < tmpProvidersToSolve.length; _i++) {
+              tmpProvidersToSolve[_i].solve(tmpProvidersToSolve[_i]);
+            }
             this.onBeforeSolve();
             // Now walk through any loaded views and initialize them as well.
             var tmpLoadedViews = Object.keys(this.pict.views);
             var tmpViewsToSolve = [];
-            for (var i = 0; i < tmpLoadedViews.length; i++) {
-              var tmpView = this.pict.views[tmpLoadedViews[i]];
+            for (var _i2 = 0; _i2 < tmpLoadedViews.length; _i2++) {
+              var tmpView = this.pict.views[tmpLoadedViews[_i2]];
               if (tmpView.options.AutoInitialize) {
                 tmpViewsToSolve.push(tmpView);
               }
@@ -223,8 +254,8 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
             tmpViewsToSolve.sort(function (a, b) {
               return a.options.AutoInitializeOrdinal - b.options.AutoInitializeOrdinal;
             });
-            for (var _i = 0; _i < tmpViewsToSolve.length; _i++) {
-              tmpViewsToSolve[_i].solve();
+            for (var _i3 = 0; _i3 < tmpViewsToSolve.length; _i3++) {
+              tmpViewsToSolve[_i3].solve();
             }
             this.onSolve();
             this.onAfterSolve();
@@ -237,11 +268,29 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
             var _this2 = this;
             var tmpAnticipate = this.fable.instantiateServiceProviderWithoutRegistration('Anticipate');
             tmpAnticipate.anticipate(this.onBeforeSolveAsync.bind(this));
+
+            // Walk through any loaded providers and solve them as well.
+            var tmpLoadedProviders = Object.keys(this.pict.providers);
+            var tmpProvidersToSolve = [];
+            for (var i = 0; i < tmpLoadedProviders.length; i++) {
+              var tmpProvider = this.pict.providers[tmpLoadedProviders[i]];
+              if (tmpProvider.options.AutoSolveWithApp) {
+                tmpProvidersToSolve.push(tmpProvider);
+              }
+            }
+            // Sort the views by their priority (if they are all priority 0, it will end up being add order due to JSON Object Property Key order stuff)
+            tmpProvidersToSolve.sort(function (a, b) {
+              return a.options.AutoSolveOrdinal - b.options.AutoSolveOrdinal;
+            });
+            for (var _i4 = 0; _i4 < tmpProvidersToSolve.length; _i4++) {
+              tmpAnticipate.anticipate(tmpProvidersToSolve[_i4].solveAsync.bind(tmpProvidersToSolve[_i4]));
+            }
+
             // Walk through any loaded views and solve them as well.
             var tmpLoadedViews = Object.keys(this.pict.views);
             var tmpViewsToSolve = [];
-            for (var i = 0; i < tmpLoadedViews.length; i++) {
-              var tmpView = this.pict.views[tmpLoadedViews[i]];
+            for (var _i5 = 0; _i5 < tmpLoadedViews.length; _i5++) {
+              var tmpView = this.pict.views[tmpLoadedViews[_i5]];
               if (tmpView.options.AutoSolveWithApp) {
                 tmpViewsToSolve.push(tmpView);
               }
@@ -250,8 +299,8 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
             tmpViewsToSolve.sort(function (a, b) {
               return a.options.AutoSolveOrdinal - b.options.AutoSolveOrdinal;
             });
-            for (var _i2 = 0; _i2 < tmpViewsToSolve.length; _i2++) {
-              tmpAnticipate.anticipate(tmpViewsToSolve[_i2].solveAsync.bind(tmpViewsToSolve[_i2]));
+            for (var _i6 = 0; _i6 < tmpViewsToSolve.length; _i6++) {
+              tmpAnticipate.anticipate(tmpViewsToSolve[_i6].solveAsync.bind(tmpViewsToSolve[_i6]));
             }
             tmpAnticipate.anticipate(this.onSolveAsync.bind(this));
             tmpAnticipate.anticipate(this.onAfterSolveAsync.bind(this));
@@ -318,11 +367,29 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
             if (!this.initializeTimestamp) {
               this.onBeforeInitialize();
               this.onInitialize();
+
+              // Walk through any loaded providers and initialize them as well.
+              var tmpLoadedProviders = Object.keys(this.pict.providers);
+              var tmpProvidersToInitialize = [];
+              for (var i = 0; i < tmpLoadedProviders.length; i++) {
+                var tmpProvider = this.pict.providers[tmpLoadedProviders[i]];
+                if (tmpProvider.options.AutoInitialize) {
+                  tmpProvidersToInitialize.push(tmpProvider);
+                }
+              }
+              // Sort the views by their priority (if they are all priority 0, it will end up being add order due to JSON Object Property Key order stuff)
+              tmpProvidersToInitialize.sort(function (a, b) {
+                return a.options.AutoInitializeOrdinal - b.options.AutoInitializeOrdinal;
+              });
+              for (var _i7 = 0; _i7 < tmpProvidersToInitialize.length; _i7++) {
+                tmpProvidersToInitialize[_i7].initialize();
+              }
+
               // Now walk through any loaded views and initialize them as well.
               var tmpLoadedViews = Object.keys(this.pict.views);
               var tmpViewsToInitialize = [];
-              for (var i = 0; i < tmpLoadedViews.length; i++) {
-                var tmpView = this.pict.views[tmpLoadedViews[i]];
+              for (var _i8 = 0; _i8 < tmpLoadedViews.length; _i8++) {
+                var tmpView = this.pict.views[tmpLoadedViews[_i8]];
                 if (tmpView.options.AutoInitialize) {
                   tmpViewsToInitialize.push(tmpView);
                 }
@@ -331,8 +398,8 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
               tmpViewsToInitialize.sort(function (a, b) {
                 return a.options.AutoInitializeOrdinal - b.options.AutoInitializeOrdinal;
               });
-              for (var _i3 = 0; _i3 < tmpViewsToInitialize.length; _i3++) {
-                tmpViewsToInitialize[_i3].initialize();
+              for (var _i9 = 0; _i9 < tmpViewsToInitialize.length; _i9++) {
+                tmpViewsToInitialize[_i9].initialize();
               }
               this.onAfterInitialize();
               if (this.options.AutoSolveAfterInitialize) {
@@ -371,12 +438,30 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
               }
               tmpAnticipate.anticipate(this.onBeforeInitializeAsync.bind(this));
               tmpAnticipate.anticipate(this.onInitializeAsync.bind(this));
+
+              // Walk through any loaded providers and solve them as well.
+              var tmpLoadedProviders = Object.keys(this.pict.providers);
+              var tmpProvidersToInitialize = [];
+              for (var i = 0; i < tmpLoadedProviders.length; i++) {
+                var tmpProvider = this.pict.providers[tmpLoadedProviders[i]];
+                if (tmpProvider.options.AutoInitialize) {
+                  tmpProvidersToInitialize.push(tmpProvider);
+                }
+              }
+              // Sort the views by their priority (if they are all priority 0, it will end up being add order due to JSON Object Property Key order stuff)
+              tmpProvidersToInitialize.sort(function (a, b) {
+                return a.options.AutoInitializeOrdinal - b.options.AutoInitializeOrdinal;
+              });
+              for (var _i10 = 0; _i10 < tmpProvidersToInitialize.length; _i10++) {
+                tmpAnticipate.anticipate(tmpProvidersToInitialize[_i10].initializeAsync.bind(tmpProvidersToInitialize[_i10]));
+              }
+
               // Now walk through any loaded views and initialize them as well.
               // TODO: Some optimization cleverness could be gained by grouping them into a parallelized async operation, by ordinal.
               var tmpLoadedViews = Object.keys(this.pict.views);
               var tmpViewsToInitialize = [];
-              for (var i = 0; i < tmpLoadedViews.length; i++) {
-                var tmpView = this.pict.views[tmpLoadedViews[i]];
+              for (var _i11 = 0; _i11 < tmpLoadedViews.length; _i11++) {
+                var tmpView = this.pict.views[tmpLoadedViews[_i11]];
                 if (tmpView.options.AutoInitialize) {
                   tmpViewsToInitialize.push(tmpView);
                 }
@@ -386,8 +471,8 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
               tmpViewsToInitialize.sort(function (a, b) {
                 return a.options.AutoInitializeOrdinal - b.options.AutoInitializeOrdinal;
               });
-              for (var _i4 = 0; _i4 < tmpViewsToInitialize.length; _i4++) {
-                var _tmpView = tmpViewsToInitialize[_i4];
+              for (var _i12 = 0; _i12 < tmpViewsToInitialize.length; _i12++) {
+                var _tmpView = tmpViewsToInitialize[_i12];
                 tmpAnticipate.anticipate(_tmpView.initializeAsync.bind(_tmpView));
               }
               tmpAnticipate.anticipate(this.onAfterInitializeAsync.bind(this));
@@ -476,8 +561,8 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
               var tmpView = this.pict.views[tmpLoadedViews[i]];
               tmpViewsToMarshalFromViews.push(tmpView);
             }
-            for (var _i5 = 0; _i5 < tmpViewsToMarshalFromViews.length; _i5++) {
-              tmpViewsToMarshalFromViews[_i5].marshalFromView();
+            for (var _i13 = 0; _i13 < tmpViewsToMarshalFromViews.length; _i13++) {
+              tmpViewsToMarshalFromViews[_i13].marshalFromView();
             }
             this.onMarshalFromViews();
             this.onAfterMarshalFromViews();
@@ -497,8 +582,8 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
               var tmpView = this.pict.views[tmpLoadedViews[i]];
               tmpViewsToMarshalFromViews.push(tmpView);
             }
-            for (var _i6 = 0; _i6 < tmpViewsToMarshalFromViews.length; _i6++) {
-              tmpAnticipate.anticipate(tmpViewsToMarshalFromViews[_i6].marshalFromViewAsync.bind(tmpViewsToMarshalFromViews[_i6]));
+            for (var _i14 = 0; _i14 < tmpViewsToMarshalFromViews.length; _i14++) {
+              tmpAnticipate.anticipate(tmpViewsToMarshalFromViews[_i14].marshalFromViewAsync.bind(tmpViewsToMarshalFromViews[_i14]));
             }
             tmpAnticipate.anticipate(this.onMarshalFromViewsAsync.bind(this));
             tmpAnticipate.anticipate(this.onAfterMarshalFromViewsAsync.bind(this));
@@ -570,8 +655,8 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
               var tmpView = this.pict.views[tmpLoadedViews[i]];
               tmpViewsToMarshalToViews.push(tmpView);
             }
-            for (var _i7 = 0; _i7 < tmpViewsToMarshalToViews.length; _i7++) {
-              tmpViewsToMarshalToViews[_i7].marshalToView();
+            for (var _i15 = 0; _i15 < tmpViewsToMarshalToViews.length; _i15++) {
+              tmpViewsToMarshalToViews[_i15].marshalToView();
             }
             this.onMarshalToViews();
             this.onAfterMarshalToViews();
@@ -591,8 +676,8 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
               var tmpView = this.pict.views[tmpLoadedViews[i]];
               tmpViewsToMarshalToViews.push(tmpView);
             }
-            for (var _i8 = 0; _i8 < tmpViewsToMarshalToViews.length; _i8++) {
-              tmpAnticipate.anticipate(tmpViewsToMarshalToViews[_i8].marshalToViewAsync.bind(tmpViewsToMarshalToViews[_i8]));
+            for (var _i16 = 0; _i16 < tmpViewsToMarshalToViews.length; _i16++) {
+              tmpAnticipate.anticipate(tmpViewsToMarshalToViews[_i16].marshalToViewAsync.bind(tmpViewsToMarshalToViews[_i16]));
             }
             tmpAnticipate.anticipate(this.onMarshalToViewsAsync.bind(this));
             tmpAnticipate.anticipate(this.onAfterMarshalToViewsAsync.bind(this));

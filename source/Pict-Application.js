@@ -53,6 +53,20 @@ class PictApplication extends libFableServiceBase
 	/* -------------------------------------------------------------------------- */
 	/*                     Code Section: Solve All Views                          */
 	/* -------------------------------------------------------------------------- */
+	onPreSolve()
+	{
+		if (this.pict.LogNoisiness > 3)
+		{
+			this.log.trace(`PictApp [${this.UUID}]::[${this.Hash}] ${this.options.Name} onPreSolve:`);
+		}
+		return true;
+	}
+	onPreSolveAsync(fCallback)
+	{
+		this.onPreSolve();
+		return fCallback();
+	}
+
 	onBeforeSolve()
 	{
 		if (this.pict.LogNoisiness > 3)
@@ -87,6 +101,25 @@ class PictApplication extends libFableServiceBase
 		{
 			this.log.trace(`PictApp [${this.UUID}]::[${this.Hash}] ${this.options.Name} executing solve() function...`)
 		}
+
+		// Walk through any loaded providers and solve them as well.
+		let tmpLoadedProviders = Object.keys(this.pict.providers);
+		let tmpProvidersToSolve = [];
+		for (let i = 0; i < tmpLoadedProviders.length; i++)
+		{
+			let tmpProvider = this.pict.providers[tmpLoadedProviders[i]];
+			if (tmpProvider.options.AutoSolveWithApp)
+			{
+				tmpProvidersToSolve.push(tmpProvider);
+			}
+		}
+		// Sort the views by their priority (if they are all priority 0, it will end up being add order due to JSON Object Property Key order stuff)
+		tmpProvidersToSolve.sort((a, b) => { return a.options.AutoSolveOrdinal - b.options.AutoSolveOrdinal; });
+		for (let i = 0; i < tmpProvidersToSolve.length; i++)
+		{
+			tmpProvidersToSolve[i].solve(tmpProvidersToSolve[i]);
+		}
+
 		this.onBeforeSolve();
 		// Now walk through any loaded views and initialize them as well.
 		let tmpLoadedViews = Object.keys(this.pict.views);
@@ -115,6 +148,25 @@ class PictApplication extends libFableServiceBase
 		let tmpAnticipate = this.fable.instantiateServiceProviderWithoutRegistration('Anticipate');
 
 		tmpAnticipate.anticipate(this.onBeforeSolveAsync.bind(this));
+
+		// Walk through any loaded providers and solve them as well.
+		let tmpLoadedProviders = Object.keys(this.pict.providers);
+		let tmpProvidersToSolve = [];
+		for (let i = 0; i < tmpLoadedProviders.length; i++)
+		{
+			let tmpProvider = this.pict.providers[tmpLoadedProviders[i]];
+			if (tmpProvider.options.AutoSolveWithApp)
+			{
+				tmpProvidersToSolve.push(tmpProvider);
+			}
+		}
+		// Sort the views by their priority (if they are all priority 0, it will end up being add order due to JSON Object Property Key order stuff)
+		tmpProvidersToSolve.sort((a, b) => { return a.options.AutoSolveOrdinal - b.options.AutoSolveOrdinal; });
+		for (let i = 0; i < tmpProvidersToSolve.length; i++)
+		{
+			tmpAnticipate.anticipate(tmpProvidersToSolve[i].solveAsync.bind(tmpProvidersToSolve[i]));
+		}
+
 		// Walk through any loaded views and solve them as well.
 		let tmpLoadedViews = Object.keys(this.pict.views);
 		let tmpViewsToSolve = [];
@@ -132,6 +184,7 @@ class PictApplication extends libFableServiceBase
 		{
 			tmpAnticipate.anticipate(tmpViewsToSolve[i].solveAsync.bind(tmpViewsToSolve[i]));
 		}
+
 		tmpAnticipate.anticipate(this.onSolveAsync.bind(this));
 		tmpAnticipate.anticipate(this.onAfterSolveAsync.bind(this));
 
@@ -203,6 +256,25 @@ class PictApplication extends libFableServiceBase
 		{
 			this.onBeforeInitialize();
 			this.onInitialize();
+
+			// Walk through any loaded providers and initialize them as well.
+			let tmpLoadedProviders = Object.keys(this.pict.providers);
+			let tmpProvidersToInitialize = [];
+			for (let i = 0; i < tmpLoadedProviders.length; i++)
+			{
+				let tmpProvider = this.pict.providers[tmpLoadedProviders[i]];
+				if (tmpProvider.options.AutoInitialize)
+				{
+					tmpProvidersToInitialize.push(tmpProvider);
+				}
+			}
+			// Sort the views by their priority (if they are all priority 0, it will end up being add order due to JSON Object Property Key order stuff)
+			tmpProvidersToInitialize.sort((a, b) => { return a.options.AutoInitializeOrdinal - b.options.AutoInitializeOrdinal; });
+			for (let i = 0; i < tmpProvidersToInitialize.length; i++)
+			{
+				tmpProvidersToInitialize[i].initialize();
+			}
+
 			// Now walk through any loaded views and initialize them as well.
 			let tmpLoadedViews = Object.keys(this.pict.views);
 			let tmpViewsToInitialize = [];
@@ -220,6 +292,7 @@ class PictApplication extends libFableServiceBase
 			{
 				tmpViewsToInitialize[i].initialize();
 			}
+
 			this.onAfterInitialize();
 			if (this.options.AutoSolveAfterInitialize)
 			{
@@ -267,6 +340,25 @@ class PictApplication extends libFableServiceBase
 
 			tmpAnticipate.anticipate(this.onBeforeInitializeAsync.bind(this));
 			tmpAnticipate.anticipate(this.onInitializeAsync.bind(this));
+
+			// Walk through any loaded providers and solve them as well.
+			let tmpLoadedProviders = Object.keys(this.pict.providers);
+			let tmpProvidersToInitialize = [];
+			for (let i = 0; i < tmpLoadedProviders.length; i++)
+			{
+				let tmpProvider = this.pict.providers[tmpLoadedProviders[i]];
+				if (tmpProvider.options.AutoInitialize)
+				{
+					tmpProvidersToInitialize.push(tmpProvider);
+				}
+			}
+			// Sort the views by their priority (if they are all priority 0, it will end up being add order due to JSON Object Property Key order stuff)
+			tmpProvidersToInitialize.sort((a, b) => { return a.options.AutoInitializeOrdinal - b.options.AutoInitializeOrdinal; });
+			for (let i = 0; i < tmpProvidersToInitialize.length; i++)
+			{
+				tmpAnticipate.anticipate(tmpProvidersToInitialize[i].initializeAsync.bind(tmpProvidersToInitialize[i]));
+			}
+
 			// Now walk through any loaded views and initialize them as well.
 			// TODO: Some optimization cleverness could be gained by grouping them into a parallelized async operation, by ordinal.
 			let tmpLoadedViews = Object.keys(this.pict.views);
@@ -287,6 +379,7 @@ class PictApplication extends libFableServiceBase
 				let tmpView = tmpViewsToInitialize[i];
 				tmpAnticipate.anticipate(tmpView.initializeAsync.bind(tmpView));
 			}
+
 			tmpAnticipate.anticipate(this.onAfterInitializeAsync.bind(this));
 
 			if (this.options.AutoSolveAfterInitialize)

@@ -156,6 +156,16 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
         /* -------------------------------------------------------------------------- */
         /*                     Code Section: Solve All Views                          */
         /* -------------------------------------------------------------------------- */
+        onPreSolve() {
+          if (this.pict.LogNoisiness > 3) {
+            this.log.trace("PictApp [".concat(this.UUID, "]::[").concat(this.Hash, "] ").concat(this.options.Name, " onPreSolve:"));
+          }
+          return true;
+        }
+        onPreSolveAsync(fCallback) {
+          this.onPreSolve();
+          return fCallback();
+        }
         onBeforeSolve() {
           if (this.pict.LogNoisiness > 3) {
             this.log.trace("PictApp [".concat(this.UUID, "]::[").concat(this.Hash, "] ").concat(this.options.Name, " onBeforeSolve:"));
@@ -179,6 +189,23 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
         solve() {
           if (this.pict.LogNoisiness > 2) {
             this.log.trace("PictApp [".concat(this.UUID, "]::[").concat(this.Hash, "] ").concat(this.options.Name, " executing solve() function..."));
+          }
+
+          // Walk through any loaded providers and solve them as well.
+          let tmpLoadedProviders = Object.keys(this.pict.providers);
+          let tmpProvidersToSolve = [];
+          for (let i = 0; i < tmpLoadedProviders.length; i++) {
+            let tmpProvider = this.pict.providers[tmpLoadedProviders[i]];
+            if (tmpProvider.options.AutoSolveWithApp) {
+              tmpProvidersToSolve.push(tmpProvider);
+            }
+          }
+          // Sort the views by their priority (if they are all priority 0, it will end up being add order due to JSON Object Property Key order stuff)
+          tmpProvidersToSolve.sort((a, b) => {
+            return a.options.AutoSolveOrdinal - b.options.AutoSolveOrdinal;
+          });
+          for (let i = 0; i < tmpProvidersToSolve.length; i++) {
+            tmpProvidersToSolve[i].solve(tmpProvidersToSolve[i]);
           }
           this.onBeforeSolve();
           // Now walk through any loaded views and initialize them as well.
@@ -205,6 +232,24 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
         solveAsync(fCallback) {
           let tmpAnticipate = this.fable.instantiateServiceProviderWithoutRegistration('Anticipate');
           tmpAnticipate.anticipate(this.onBeforeSolveAsync.bind(this));
+
+          // Walk through any loaded providers and solve them as well.
+          let tmpLoadedProviders = Object.keys(this.pict.providers);
+          let tmpProvidersToSolve = [];
+          for (let i = 0; i < tmpLoadedProviders.length; i++) {
+            let tmpProvider = this.pict.providers[tmpLoadedProviders[i]];
+            if (tmpProvider.options.AutoSolveWithApp) {
+              tmpProvidersToSolve.push(tmpProvider);
+            }
+          }
+          // Sort the views by their priority (if they are all priority 0, it will end up being add order due to JSON Object Property Key order stuff)
+          tmpProvidersToSolve.sort((a, b) => {
+            return a.options.AutoSolveOrdinal - b.options.AutoSolveOrdinal;
+          });
+          for (let i = 0; i < tmpProvidersToSolve.length; i++) {
+            tmpAnticipate.anticipate(tmpProvidersToSolve[i].solveAsync.bind(tmpProvidersToSolve[i]));
+          }
+
           // Walk through any loaded views and solve them as well.
           let tmpLoadedViews = Object.keys(this.pict.views);
           let tmpViewsToSolve = [];
@@ -272,6 +317,24 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
           if (!this.initializeTimestamp) {
             this.onBeforeInitialize();
             this.onInitialize();
+
+            // Walk through any loaded providers and initialize them as well.
+            let tmpLoadedProviders = Object.keys(this.pict.providers);
+            let tmpProvidersToInitialize = [];
+            for (let i = 0; i < tmpLoadedProviders.length; i++) {
+              let tmpProvider = this.pict.providers[tmpLoadedProviders[i]];
+              if (tmpProvider.options.AutoInitialize) {
+                tmpProvidersToInitialize.push(tmpProvider);
+              }
+            }
+            // Sort the views by their priority (if they are all priority 0, it will end up being add order due to JSON Object Property Key order stuff)
+            tmpProvidersToInitialize.sort((a, b) => {
+              return a.options.AutoInitializeOrdinal - b.options.AutoInitializeOrdinal;
+            });
+            for (let i = 0; i < tmpProvidersToInitialize.length; i++) {
+              tmpProvidersToInitialize[i].initialize();
+            }
+
             // Now walk through any loaded views and initialize them as well.
             let tmpLoadedViews = Object.keys(this.pict.views);
             let tmpViewsToInitialize = [];
@@ -322,6 +385,24 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
             }
             tmpAnticipate.anticipate(this.onBeforeInitializeAsync.bind(this));
             tmpAnticipate.anticipate(this.onInitializeAsync.bind(this));
+
+            // Walk through any loaded providers and solve them as well.
+            let tmpLoadedProviders = Object.keys(this.pict.providers);
+            let tmpProvidersToInitialize = [];
+            for (let i = 0; i < tmpLoadedProviders.length; i++) {
+              let tmpProvider = this.pict.providers[tmpLoadedProviders[i]];
+              if (tmpProvider.options.AutoInitialize) {
+                tmpProvidersToInitialize.push(tmpProvider);
+              }
+            }
+            // Sort the views by their priority (if they are all priority 0, it will end up being add order due to JSON Object Property Key order stuff)
+            tmpProvidersToInitialize.sort((a, b) => {
+              return a.options.AutoInitializeOrdinal - b.options.AutoInitializeOrdinal;
+            });
+            for (let i = 0; i < tmpProvidersToInitialize.length; i++) {
+              tmpAnticipate.anticipate(tmpProvidersToInitialize[i].initializeAsync.bind(tmpProvidersToInitialize[i]));
+            }
+
             // Now walk through any loaded views and initialize them as well.
             // TODO: Some optimization cleverness could be gained by grouping them into a parallelized async operation, by ordinal.
             let tmpLoadedViews = Object.keys(this.pict.views);

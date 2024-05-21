@@ -15,6 +15,7 @@ const libPictApplication = require(`../source/Pict-Application.js`);
 
 const libPictView = require('pict-view');
 
+const libSimpleAsyncProvider = require('../example_applications/simple/PictProvider-Simple-AsyncExercises.js');
 const libSimpleAsyncView = require('../example_applications/simple/PictView-Simple-AsyncExercises.js');
 
 suite
@@ -120,6 +121,43 @@ suite
 								for (let i = 0; i < 2; i++)
 								{
 									_Pict.addView(`Pict-View-Async-1${i}`, {}, libSimpleAsyncView);
+								}
+
+								_PictApplication.initializeAsync(
+									(pError) =>
+									{
+										return fDone();
+									}
+								)
+							}
+						);
+					test(
+							'Async View *and* Provider Initialization with Priorities',
+							(fDone) =>
+							{
+								let _Pict = new libPict();
+								_Pict.LogNoisiness = 1;
+								let _PictEnvironment = new libPict.EnvironmentLog(_Pict);
+								let _PictApplication = _Pict.addApplication('Pict-PictApplication',  {}, libPictApplication);
+
+								for (let i = 0; i < 1; i++)
+								{
+									_Pict.addProvider(`Pict-Provider-Async-0-${i}`, {}, libSimpleAsyncProvider);
+								}
+								for (let i = 0; i < 7; i++)
+								{
+									_Pict.addProvider(`Pict-Provider-Async-1-${i}`, {ProviderIdentifier:`Deferred-Provider-${i}`, AutoInitializeOrdinal: 1}, libSimpleAsyncProvider);
+								}
+
+
+								for (let i = 0; i < 2; i++)
+								{
+									_Pict.addView(`Pict-View-Async-0-${i}`, {}, libSimpleAsyncView);
+								}
+								_Pict.addView('Pict-View', {ViewIdentifier:'Deferred-View', AutoInitializeOrdinal: 1}, libPictView);
+								for (let i = 0; i < 4; i++)
+								{
+									_Pict.addView(`Pict-View-Async-1-${i}`, {}, libSimpleAsyncView);
 								}
 
 								_PictApplication.initializeAsync(
