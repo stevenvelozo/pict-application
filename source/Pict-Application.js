@@ -10,9 +10,10 @@ const defaultPictSettings = (
 		MainViewportDestinationAddress: false,
 		MainViewportDefaultDataAddress: false,
 
-		// Whether or not we should automatically render the main viewport after we initialize the pict application
+		// Whether or not we should automatically render the main viewport and other autorender views after we initialize the pict application
 		AutoSolveAfterInitialize: true,
 		AutoRenderMainViewportViewAfterInitialize: true,
+		AutoRenderViewsAfterInitialize: false,
 
 		Manifests: {},
 		// The prefix to prepend on all template destination hashes
@@ -36,6 +37,7 @@ class PictApplication extends libFableServiceBase
 		this.lastSolvedTimestamp = false;
 		this.lastMarshalFromViewsTimestamp = false;
 		this.lastMarshalToViewsTimestamp = false;
+		this.lastAutoRenderTimestamp = false;
 
 		// Load all the manifests for the application
 		let tmpManifestKeys = Object.keys(this.options.Manifests);
@@ -149,6 +151,21 @@ class PictApplication extends libFableServiceBase
 
 		tmpAnticipate.anticipate(this.onBeforeSolveAsync.bind(this));
 
+
+		// Allow the callback to be passed in as the last parameter no matter what
+		let tmpCallback = (typeof(fCallback) === 'function') ? fCallback : false;
+
+		if (!tmpCallback)
+		{
+			this.log.warn(`PictApp [${this.UUID}]::[${this.Hash}] ${this.options.Name} solveAsync was called without a valid callback.  A callback will be generated but this could lead to race conditions.`);
+			tmpCallback = (pError) => 
+				{
+					if (pError)
+					{
+						this.log.error(`PictApp [${this.UUID}]::[${this.Hash}] ${this.options.Name} solveAsync Auto Callback Error: ${pError}`, pError)						
+					}
+				};
+		}
 		// Walk through any loaded providers and solve them as well.
 		let tmpLoadedProviders = Object.keys(this.pict.providers);
 		let tmpProvidersToSolve = [];
@@ -196,7 +213,7 @@ class PictApplication extends libFableServiceBase
 					this.log.trace(`PictApp [${this.UUID}]::[${this.Hash}] ${this.options.Name} solveAsync() complete.`);
 				}
 				this.lastSolvedTimestamp = this.fable.log.getTimeStamp();
-				return fCallback(pError);
+				return tmpCallback(pError);
 			});
 	}
 
@@ -322,11 +339,26 @@ class PictApplication extends libFableServiceBase
 			return false;
 		}
 	}
-	initializeAsync(fCallBack)
+	initializeAsync(fCallback)
 	{
 		if (this.pict.LogControlFlow)
 		{
 			this.log.trace(`PICT-ControlFlow APPLICATION [${this.UUID}]::[${this.Hash}] ${this.options.Name} initializeAsync:`);
+		}
+
+		// Allow the callback to be passed in as the last parameter no matter what
+		let tmpCallback = (typeof(fCallback) === 'function') ? fCallback : false;
+
+		if (!tmpCallback)
+		{
+			this.log.warn(`PictApp [${this.UUID}]::[${this.Hash}] ${this.options.Name} initializeAsync was called without a valid callback.  A callback will be generated but this could lead to race conditions.`);
+			tmpCallback = (pError) => 
+				{
+					if (pError)
+					{
+						this.log.error(`PictApp [${this.UUID}]::[${this.Hash}] ${this.options.Name} initializeAsync Auto Callback Error: ${pError}`, pError)						
+					}
+				};
 		}
 
 		if (!this.initializeTimestamp)
@@ -408,14 +440,14 @@ class PictApplication extends libFableServiceBase
 					{
 						this.log.trace(`PictApp [${this.UUID}]::[${this.Hash}] ${this.options.Name} initialization complete.`);
 					}
-					return fCallBack();
+					return tmpCallback();
 				});
 		}
 		else
 		{
 			this.log.warn(`PictApp [${this.UUID}]::[${this.Hash}] ${this.options.Name} async initialize called but initialization is already completed.  Aborting.`);
 			// TODO: Should this be an error?
-			return fCallback();
+			return tmpCallback();
 		}
 	}
 
@@ -492,6 +524,21 @@ class PictApplication extends libFableServiceBase
 	{
 		let tmpAnticipate = this.fable.instantiateServiceProviderWithoutRegistration('Anticipate');
 
+		// Allow the callback to be passed in as the last parameter no matter what
+		let tmpCallback = (typeof(fCallback) === 'function') ? fCallback : false;
+
+		if (!tmpCallback)
+		{
+			this.log.warn(`PictApp [${this.UUID}]::[${this.Hash}] ${this.options.Name} marshalFromViewsAsync was called without a valid callback.  A callback will be generated but this could lead to race conditions.`);
+			tmpCallback = (pError) => 
+				{
+					if (pError)
+					{
+						this.log.error(`PictApp [${this.UUID}]::[${this.Hash}] ${this.options.Name} marshalFromViewsAsync Auto Callback Error: ${pError}`, pError)						
+					}
+				};
+		}
+
 		tmpAnticipate.anticipate(this.onBeforeMarshalFromViewsAsync.bind(this));
 		// Walk through any loaded views and marshalFromViews them as well.
 		let tmpLoadedViews = Object.keys(this.pict.views);
@@ -516,7 +563,7 @@ class PictApplication extends libFableServiceBase
 					this.log.trace(`PictApp [${this.UUID}]::[${this.Hash}] ${this.options.Name} marshalFromViewsAsync() complete.`);
 				}
 				this.lastMarshalFromViewsTimestamp = this.fable.log.getTimeStamp();
-				return fCallback(pError);
+				return tmpCallback(pError);
 			});
 	}
 
@@ -593,6 +640,21 @@ class PictApplication extends libFableServiceBase
 	{
 		let tmpAnticipate = this.fable.instantiateServiceProviderWithoutRegistration('Anticipate');
 
+		// Allow the callback to be passed in as the last parameter no matter what
+		let tmpCallback = (typeof(fCallback) === 'function') ? fCallback : false;
+
+		if (!tmpCallback)
+		{
+			this.log.warn(`PictApp [${this.UUID}]::[${this.Hash}] ${this.options.Name} marshalToViewsAsync was called without a valid callback.  A callback will be generated but this could lead to race conditions.`);
+			tmpCallback = (pError) => 
+				{
+					if (pError)
+					{
+						this.log.error(`PictApp [${this.UUID}]::[${this.Hash}] ${this.options.Name} marshalToViewsAsync Auto Callback Error: ${pError}`, pError)						
+					}
+				};
+		}
+
 		tmpAnticipate.anticipate(this.onBeforeMarshalToViewsAsync.bind(this));
 		// Walk through any loaded views and marshalToViews them as well.
 		let tmpLoadedViews = Object.keys(this.pict.views);
@@ -617,7 +679,7 @@ class PictApplication extends libFableServiceBase
 					this.log.trace(`PictApp [${this.UUID}]::[${this.Hash}] ${this.options.Name} marshalToViewsAsync() complete.`);
 				}
 				this.lastMarshalToViewsTimestamp = this.fable.log.getTimeStamp();
-				return fCallback(pError);
+				return tmpCallback(pError);
 			});
 	}
 
@@ -667,7 +729,7 @@ class PictApplication extends libFableServiceBase
 			this.log.trace(`PICT-ControlFlow APPLICATION [${this.UUID}]::[${this.Hash}] ${this.options.Name} renderMainViewport:`);
 		}
 
-		return this.render(this.options.MainViewportViewIdentifier, this.options.MainViewportRenderableHash, this.options.MainViewportDestinationAddress, this.options.MainViewportDefaultDataAddress);
+		return this.render();
 	}
 
 	renderAsync(pViewIdentifier, pRenderableHash, pRenderDestinationAddress, pTemplateDataAddress, fCallback)
@@ -676,6 +738,26 @@ class PictApplication extends libFableServiceBase
 		let tmpRenderableHash = (typeof(pRenderableHash) === 'undefined') ? this.options.MainViewportRenderableHash : pRenderableHash;
 		let tmpRenderDestinationAddress = (typeof(pRenderDestinationAddress) === 'undefined') ? this.options.MainViewportDestinationAddress : pRenderDestinationAddress;
 		let tmpTemplateDataAddress = (typeof(pTemplateDataAddress) === 'undefined') ? this.options.MainViewportDefaultDataAddress : pTemplateDataAddress;
+
+		// Allow the callback to be passed in as the last parameter no matter what
+		let tmpCallback = (typeof(fCallback) === 'function') ? fCallback :
+							(typeof(pTemplateDataAddress) === 'function') ? pTemplateDataAddress :
+							(typeof(pRenderDestinationAddress) === 'function') ? pRenderDestinationAddress :
+							(typeof(pRenderableHash) === 'function') ? pRenderableHash :
+							(typeof(pViewIdentifier) === 'function') ? pViewIdentifier :
+							false;
+
+		if (!tmpCallback)
+		{
+			this.log.warn(`PictApp [${this.UUID}]::[${this.Hash}] ${this.options.Name} renderAsync was called without a valid callback.  A callback will be generated but this could lead to race conditions.`);
+			tmpCallback = (pError) => 
+				{
+					if (pError)
+					{
+						this.log.error(`PictApp [${this.UUID}]::[${this.Hash}] ${this.options.Name} renderAsync Auto Callback Error: ${pError}`, pError)						
+					}
+				};
+		}
 
 		if (this.pict.LogControlFlow)
 		{
@@ -690,10 +772,10 @@ class PictApplication extends libFableServiceBase
 			{
 				this.log.error(tmpErrorMessage);
 			}
-			return fCallback(new Error(tmpErrorMessage));
+			return tmpCallback(new Error(tmpErrorMessage));
 		}
 
-		return tmpView.renderAsync(tmpRenderableHash, tmpRenderDestinationAddress, tmpTemplateDataAddress, fCallback);
+		return tmpView.renderAsync(tmpRenderableHash, tmpRenderDestinationAddress, tmpTemplateDataAddress, tmpCallback);
 	}
 	renderMainViewportAsync(fCallback)
 	{
@@ -702,7 +784,70 @@ class PictApplication extends libFableServiceBase
 			this.log.trace(`PICT-ControlFlow APPLICATION [${this.UUID}]::[${this.Hash}] ${this.options.Name} renderMainViewportAsync:`);
 		}
 
-		return this.renderAsync(this.options.MainViewportViewIdentifier, this.options.MainViewportRenderableHash, this.options.MainViewportDestinationAddress, this.options.MainViewportDefaultDataAddress, fCallback);
+		return this.renderAsync(fCallback);
+	}
+
+	renderAutoViews()
+	{
+		// Render all views with AutoRender set to true.
+	}
+	renderAutoViewsAsync(fCallback)
+	{
+		let tmpAnticipate = this.fable.instantiateServiceProviderWithoutRegistration('Anticipate');
+
+		// Allow the callback to be passed in as the last parameter no matter what
+		let tmpCallback = (typeof(fCallback) === 'function') ? fCallback :
+							(typeof(pTemplateDataAddress) === 'function') ? pTemplateDataAddress :
+							(typeof(pRenderDestinationAddress) === 'function') ? pRenderDestinationAddress :
+							(typeof(pRenderableHash) === 'function') ? pRenderableHash :
+							(typeof(pViewIdentifier) === 'function') ? pViewIdentifier :
+							false;
+
+		if (!tmpCallback)
+		{
+			this.log.warn(`PictApp [${this.UUID}]::[${this.Hash}] ${this.options.Name} renderAutoViewsAsync was called without a valid callback.  A callback will be generated but this could lead to race conditions.`);
+			tmpCallback = (pError) => 
+				{
+					if (pError)
+					{
+						this.log.error(`PictApp [${this.UUID}]::[${this.Hash}] ${this.options.Name} renderAutoViewsAsync Auto Callback Error: ${pError}`, pError)						
+					}
+				};
+		}
+
+		if (this.pict.LogNoisiness > 0)
+		{
+			this.log.trace(`PictApp [${this.UUID}]::[${this.Hash}] ${this.options.Name} beginning renderAutoViewsAsync...`);
+		}
+
+		// Now walk through any loaded views and sort them by the AutoRender ordinal
+		// TODO: Some optimization cleverness could be gained by grouping them into a parallelized async operation, by ordinal.
+		let tmpLoadedViews = Object.keys(this.pict.views);
+		// Sort the views by their priority
+		// If they are all the default priority 0, it will end up being add order due to JSON Object Property Key order stuff
+		tmpLoadedViews.sort((a, b) => 
+		{
+			return this.pict.views[a].options.AutoRenderOrdinal - this.pict.views[b].options.AutoRenderOrdinal;
+		});
+		for (let i = 0; i < tmpLoadedViews.length; i++)
+		{
+			let tmpView = this.pict.views[tmpLoadedViews[i]];
+			if (tmpView.options.AutoRender)
+			{
+				tmpAnticipate.anticipate(tmpView.renderAsync.bind(tmpView));
+			}
+		}
+
+		tmpAnticipate.wait(
+			(pError) =>
+			{
+				this.lastAutoRenderTimestamp = this.fable.log.getTimeStamp();
+				if (this.pict.LogNoisiness > 0)
+				{
+					this.log.trace(`PictApp [${this.UUID}]::[${this.Hash}] ${this.options.Name} renderAutoViewsAsync complete.`);
+				}
+				return tmpCallback(pError);
+			});
 	}
 }
 

@@ -61,6 +61,18 @@ class SimpleAsyncView extends libPictView
 				return fCallback();
 			}, tmpInitTime);
 	}
+
+	onAfterRenderAsync(fCallBack)
+	{
+		this.log.trace(`Simple View ${this.UUID}::${this.Hash} onAfterRenderAsync being called.`);
+		return super.onAfterRenderAsync(fCallBack);
+	}
+
+	onAfterRender()
+	{
+		this.log.trace(`Simple View ${this.UUID}::${this.Hash} onAfterRender being called.`);
+		return super.onAfterRender();
+	}
 }
 
 module.exports = SimpleAsyncView;

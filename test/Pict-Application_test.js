@@ -163,7 +163,7 @@ suite
 								_PictApplication.initializeAsync(
 									(pError) =>
 									{
-										return fDone();
+										return _PictApplication.renderAutoViewsAsync(fDone);
 									}
 								)
 							}

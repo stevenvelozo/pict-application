@@ -135,9 +135,10 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
         MainViewportRenderableHash: false,
         MainViewportDestinationAddress: false,
         MainViewportDefaultDataAddress: false,
-        // Whether or not we should automatically render the main viewport after we initialize the pict application
+        // Whether or not we should automatically render the main viewport and other autorender views after we initialize the pict application
         AutoSolveAfterInitialize: true,
         AutoRenderMainViewportViewAfterInitialize: true,
+        AutoRenderViewsAfterInitialize: false,
         Manifests: {},
         // The prefix to prepend on all template destination hashes
         IdentifierAddressPrefix: 'PICT-'
@@ -159,6 +160,7 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
           _this.lastSolvedTimestamp = false;
           _this.lastMarshalFromViewsTimestamp = false;
           _this.lastMarshalToViewsTimestamp = false;
+          _this.lastAutoRenderTimestamp = false;
 
           // Load all the manifests for the application
           var tmpManifestKeys = Object.keys(_this.options.Manifests);
@@ -269,6 +271,16 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
             var tmpAnticipate = this.fable.instantiateServiceProviderWithoutRegistration('Anticipate');
             tmpAnticipate.anticipate(this.onBeforeSolveAsync.bind(this));
 
+            // Allow the callback to be passed in as the last parameter no matter what
+            var tmpCallback = typeof fCallback === 'function' ? fCallback : false;
+            if (!tmpCallback) {
+              this.log.warn("PictApp [".concat(this.UUID, "]::[").concat(this.Hash, "] ").concat(this.options.Name, " solveAsync was called without a valid callback.  A callback will be generated but this could lead to race conditions."));
+              tmpCallback = function tmpCallback(pError) {
+                if (pError) {
+                  _this2.log.error("PictApp [".concat(_this2.UUID, "]::[").concat(_this2.Hash, "] ").concat(_this2.options.Name, " solveAsync Auto Callback Error: ").concat(pError), pError);
+                }
+              };
+            }
             // Walk through any loaded providers and solve them as well.
             var tmpLoadedProviders = Object.keys(this.pict.providers);
             var tmpProvidersToSolve = [];
@@ -309,7 +321,7 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
                 _this2.log.trace("PictApp [".concat(_this2.UUID, "]::[").concat(_this2.Hash, "] ").concat(_this2.options.Name, " solveAsync() complete."));
               }
               _this2.lastSolvedTimestamp = _this2.fable.log.getTimeStamp();
-              return fCallback(pError);
+              return tmpCallback(pError);
             });
           }
         }, {
@@ -426,10 +438,21 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
           }
         }, {
           key: "initializeAsync",
-          value: function initializeAsync(fCallBack) {
+          value: function initializeAsync(fCallback) {
             var _this3 = this;
             if (this.pict.LogControlFlow) {
               this.log.trace("PICT-ControlFlow APPLICATION [".concat(this.UUID, "]::[").concat(this.Hash, "] ").concat(this.options.Name, " initializeAsync:"));
+            }
+
+            // Allow the callback to be passed in as the last parameter no matter what
+            var tmpCallback = typeof fCallback === 'function' ? fCallback : false;
+            if (!tmpCallback) {
+              this.log.warn("PictApp [".concat(this.UUID, "]::[").concat(this.Hash, "] ").concat(this.options.Name, " initializeAsync was called without a valid callback.  A callback will be generated but this could lead to race conditions."));
+              tmpCallback = function tmpCallback(pError) {
+                if (pError) {
+                  _this3.log.error("PictApp [".concat(_this3.UUID, "]::[").concat(_this3.Hash, "] ").concat(_this3.options.Name, " initializeAsync Auto Callback Error: ").concat(pError), pError);
+                }
+              };
             }
             if (!this.initializeTimestamp) {
               var tmpAnticipate = this.fable.instantiateServiceProviderWithoutRegistration('Anticipate');
@@ -493,12 +516,12 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
                 if (_this3.pict.LogNoisiness > 2) {
                   _this3.log.trace("PictApp [".concat(_this3.UUID, "]::[").concat(_this3.Hash, "] ").concat(_this3.options.Name, " initialization complete."));
                 }
-                return fCallBack();
+                return tmpCallback();
               });
             } else {
               this.log.warn("PictApp [".concat(this.UUID, "]::[").concat(this.Hash, "] ").concat(this.options.Name, " async initialize called but initialization is already completed.  Aborting."));
               // TODO: Should this be an error?
-              return fCallback();
+              return tmpCallback();
             }
           }
         }, {
@@ -574,6 +597,17 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
           value: function marshalFromViewsAsync(fCallback) {
             var _this4 = this;
             var tmpAnticipate = this.fable.instantiateServiceProviderWithoutRegistration('Anticipate');
+
+            // Allow the callback to be passed in as the last parameter no matter what
+            var tmpCallback = typeof fCallback === 'function' ? fCallback : false;
+            if (!tmpCallback) {
+              this.log.warn("PictApp [".concat(this.UUID, "]::[").concat(this.Hash, "] ").concat(this.options.Name, " marshalFromViewsAsync was called without a valid callback.  A callback will be generated but this could lead to race conditions."));
+              tmpCallback = function tmpCallback(pError) {
+                if (pError) {
+                  _this4.log.error("PictApp [".concat(_this4.UUID, "]::[").concat(_this4.Hash, "] ").concat(_this4.options.Name, " marshalFromViewsAsync Auto Callback Error: ").concat(pError), pError);
+                }
+              };
+            }
             tmpAnticipate.anticipate(this.onBeforeMarshalFromViewsAsync.bind(this));
             // Walk through any loaded views and marshalFromViews them as well.
             var tmpLoadedViews = Object.keys(this.pict.views);
@@ -592,7 +626,7 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
                 _this4.log.trace("PictApp [".concat(_this4.UUID, "]::[").concat(_this4.Hash, "] ").concat(_this4.options.Name, " marshalFromViewsAsync() complete."));
               }
               _this4.lastMarshalFromViewsTimestamp = _this4.fable.log.getTimeStamp();
-              return fCallback(pError);
+              return tmpCallback(pError);
             });
           }
         }, {
@@ -668,6 +702,17 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
           value: function marshalToViewsAsync(fCallback) {
             var _this5 = this;
             var tmpAnticipate = this.fable.instantiateServiceProviderWithoutRegistration('Anticipate');
+
+            // Allow the callback to be passed in as the last parameter no matter what
+            var tmpCallback = typeof fCallback === 'function' ? fCallback : false;
+            if (!tmpCallback) {
+              this.log.warn("PictApp [".concat(this.UUID, "]::[").concat(this.Hash, "] ").concat(this.options.Name, " marshalToViewsAsync was called without a valid callback.  A callback will be generated but this could lead to race conditions."));
+              tmpCallback = function tmpCallback(pError) {
+                if (pError) {
+                  _this5.log.error("PictApp [".concat(_this5.UUID, "]::[").concat(_this5.Hash, "] ").concat(_this5.options.Name, " marshalToViewsAsync Auto Callback Error: ").concat(pError), pError);
+                }
+              };
+            }
             tmpAnticipate.anticipate(this.onBeforeMarshalToViewsAsync.bind(this));
             // Walk through any loaded views and marshalToViews them as well.
             var tmpLoadedViews = Object.keys(this.pict.views);
@@ -686,7 +731,7 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
                 _this5.log.trace("PictApp [".concat(_this5.UUID, "]::[").concat(_this5.Hash, "] ").concat(_this5.options.Name, " marshalToViewsAsync() complete."));
               }
               _this5.lastMarshalToViewsTimestamp = _this5.fable.log.getTimeStamp();
-              return fCallback(pError);
+              return tmpCallback(pError);
             });
           }
         }, {
@@ -732,15 +777,27 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
             if (this.pict.LogControlFlow) {
               this.log.trace("PICT-ControlFlow APPLICATION [".concat(this.UUID, "]::[").concat(this.Hash, "] ").concat(this.options.Name, " renderMainViewport:"));
             }
-            return this.render(this.options.MainViewportViewIdentifier, this.options.MainViewportRenderableHash, this.options.MainViewportDestinationAddress, this.options.MainViewportDefaultDataAddress);
+            return this.render();
           }
         }, {
           key: "renderAsync",
           value: function renderAsync(pViewIdentifier, pRenderableHash, pRenderDestinationAddress, pTemplateDataAddress, fCallback) {
+            var _this6 = this;
             var tmpViewIdentifier = typeof pViewIdentifier === 'undefined' ? this.options.MainViewportViewIdentifier : pViewIdentifier;
             var tmpRenderableHash = typeof pRenderableHash === 'undefined' ? this.options.MainViewportRenderableHash : pRenderableHash;
             var tmpRenderDestinationAddress = typeof pRenderDestinationAddress === 'undefined' ? this.options.MainViewportDestinationAddress : pRenderDestinationAddress;
             var tmpTemplateDataAddress = typeof pTemplateDataAddress === 'undefined' ? this.options.MainViewportDefaultDataAddress : pTemplateDataAddress;
+
+            // Allow the callback to be passed in as the last parameter no matter what
+            var tmpCallback = typeof fCallback === 'function' ? fCallback : typeof pTemplateDataAddress === 'function' ? pTemplateDataAddress : typeof pRenderDestinationAddress === 'function' ? pRenderDestinationAddress : typeof pRenderableHash === 'function' ? pRenderableHash : typeof pViewIdentifier === 'function' ? pViewIdentifier : false;
+            if (!tmpCallback) {
+              this.log.warn("PictApp [".concat(this.UUID, "]::[").concat(this.Hash, "] ").concat(this.options.Name, " renderAsync was called without a valid callback.  A callback will be generated but this could lead to race conditions."));
+              tmpCallback = function tmpCallback(pError) {
+                if (pError) {
+                  _this6.log.error("PictApp [".concat(_this6.UUID, "]::[").concat(_this6.Hash, "] ").concat(_this6.options.Name, " renderAsync Auto Callback Error: ").concat(pError), pError);
+                }
+              };
+            }
             if (this.pict.LogControlFlow) {
               this.log.trace("PICT-ControlFlow APPLICATION [".concat(this.UUID, "]::[").concat(this.Hash, "] ").concat(this.options.Name, " VIEW Renderable[").concat(tmpRenderableHash, "] Destination[").concat(tmpRenderDestinationAddress, "] TemplateDataAddress[").concat(tmpTemplateDataAddress, "] renderAsync:"));
             }
@@ -750,9 +807,9 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
               if (this.pict.LogNoisiness > 3) {
                 this.log.error(tmpErrorMessage);
               }
-              return fCallback(new Error(tmpErrorMessage));
+              return tmpCallback(new Error(tmpErrorMessage));
             }
-            return tmpView.renderAsync(tmpRenderableHash, tmpRenderDestinationAddress, tmpTemplateDataAddress, fCallback);
+            return tmpView.renderAsync(tmpRenderableHash, tmpRenderDestinationAddress, tmpTemplateDataAddress, tmpCallback);
           }
         }, {
           key: "renderMainViewportAsync",
@@ -760,7 +817,54 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
             if (this.pict.LogControlFlow) {
               this.log.trace("PICT-ControlFlow APPLICATION [".concat(this.UUID, "]::[").concat(this.Hash, "] ").concat(this.options.Name, " renderMainViewportAsync:"));
             }
-            return this.renderAsync(this.options.MainViewportViewIdentifier, this.options.MainViewportRenderableHash, this.options.MainViewportDestinationAddress, this.options.MainViewportDefaultDataAddress, fCallback);
+            return this.renderAsync(fCallback);
+          }
+        }, {
+          key: "renderAutoViews",
+          value: function renderAutoViews() {
+            // Render all views with AutoRender set to true.
+          }
+        }, {
+          key: "renderAutoViewsAsync",
+          value: function renderAutoViewsAsync(fCallback) {
+            var _this7 = this;
+            var tmpAnticipate = this.fable.instantiateServiceProviderWithoutRegistration('Anticipate');
+
+            // Allow the callback to be passed in as the last parameter no matter what
+            var tmpCallback = typeof fCallback === 'function' ? fCallback : typeof pTemplateDataAddress === 'function' ? pTemplateDataAddress : typeof pRenderDestinationAddress === 'function' ? pRenderDestinationAddress : typeof pRenderableHash === 'function' ? pRenderableHash : typeof pViewIdentifier === 'function' ? pViewIdentifier : false;
+            if (!tmpCallback) {
+              this.log.warn("PictApp [".concat(this.UUID, "]::[").concat(this.Hash, "] ").concat(this.options.Name, " renderAutoViewsAsync was called without a valid callback.  A callback will be generated but this could lead to race conditions."));
+              tmpCallback = function tmpCallback(pError) {
+                if (pError) {
+                  _this7.log.error("PictApp [".concat(_this7.UUID, "]::[").concat(_this7.Hash, "] ").concat(_this7.options.Name, " renderAutoViewsAsync Auto Callback Error: ").concat(pError), pError);
+                }
+              };
+            }
+            if (this.pict.LogNoisiness > 0) {
+              this.log.trace("PictApp [".concat(this.UUID, "]::[").concat(this.Hash, "] ").concat(this.options.Name, " beginning renderAutoViewsAsync..."));
+            }
+
+            // Now walk through any loaded views and sort them by the AutoRender ordinal
+            // TODO: Some optimization cleverness could be gained by grouping them into a parallelized async operation, by ordinal.
+            var tmpLoadedViews = Object.keys(this.pict.views);
+            // Sort the views by their priority
+            // If they are all the default priority 0, it will end up being add order due to JSON Object Property Key order stuff
+            tmpLoadedViews.sort(function (a, b) {
+              return _this7.pict.views[a].options.AutoRenderOrdinal - _this7.pict.views[b].options.AutoRenderOrdinal;
+            });
+            for (var i = 0; i < tmpLoadedViews.length; i++) {
+              var tmpView = this.pict.views[tmpLoadedViews[i]];
+              if (tmpView.options.AutoRender) {
+                tmpAnticipate.anticipate(tmpView.renderAsync.bind(tmpView));
+              }
+            }
+            tmpAnticipate.wait(function (pError) {
+              _this7.lastAutoRenderTimestamp = _this7.fable.log.getTimeStamp();
+              if (_this7.pict.LogNoisiness > 0) {
+                _this7.log.trace("PictApp [".concat(_this7.UUID, "]::[").concat(_this7.Hash, "] ").concat(_this7.options.Name, " renderAutoViewsAsync complete."));
+              }
+              return tmpCallback(pError);
+            });
           }
         }]);
         return PictApplication;
