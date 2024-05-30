@@ -702,10 +702,10 @@ class PictApplication extends libFableServiceBase
 	/* -------------------------------------------------------------------------- */
 	render(pViewIdentifier, pRenderableHash, pRenderDestinationAddress, pTemplateDataAddress)
 	{
-		let tmpViewIdentifier = (typeof(pViewIdentifier) === 'undefined') ? this.options.MainViewportViewIdentifier : pViewIdentifier;
-		let tmpRenderableHash = (typeof(pRenderableHash) === 'undefined') ? this.options.MainViewportRenderableHash : pRenderableHash;
-		let tmpRenderDestinationAddress = (typeof(pRenderDestinationAddress) === 'undefined') ? this.options.MainViewportDestinationAddress : pRenderDestinationAddress;
-		let tmpTemplateDataAddress = (typeof(pTemplateDataAddress) === 'undefined') ? this.options.MainViewportDefaultDataAddress : pTemplateDataAddress;
+		let tmpViewIdentifier = (typeof(pViewIdentifier) !== 'string') ? this.options.MainViewportViewIdentifier : pViewIdentifier;
+		let tmpRenderableHash = (typeof(pRenderableHash) !== 'string') ? this.options.MainViewportRenderableHash : pRenderableHash;
+		let tmpRenderDestinationAddress = (typeof(pRenderDestinationAddress) !== 'string') ? this.options.MainViewportDestinationAddress : pRenderDestinationAddress;
+		let tmpTemplateDataAddress = (typeof(pTemplateDataAddress) !== 'string') ? this.options.MainViewportDefaultDataAddress : pTemplateDataAddress;
 
 		if (this.pict.LogControlFlow)
 		{
@@ -734,10 +734,10 @@ class PictApplication extends libFableServiceBase
 
 	renderAsync(pViewIdentifier, pRenderableHash, pRenderDestinationAddress, pTemplateDataAddress, fCallback)
 	{
-		let tmpViewIdentifier = (typeof(pViewIdentifier) === 'undefined') ? this.options.MainViewportViewIdentifier : pViewIdentifier;
-		let tmpRenderableHash = (typeof(pRenderableHash) === 'undefined') ? this.options.MainViewportRenderableHash : pRenderableHash;
-		let tmpRenderDestinationAddress = (typeof(pRenderDestinationAddress) === 'undefined') ? this.options.MainViewportDestinationAddress : pRenderDestinationAddress;
-		let tmpTemplateDataAddress = (typeof(pTemplateDataAddress) === 'undefined') ? this.options.MainViewportDefaultDataAddress : pTemplateDataAddress;
+		let tmpViewIdentifier = (typeof(pViewIdentifier) !== 'string') ? this.options.MainViewportViewIdentifier : pViewIdentifier;
+		let tmpRenderableHash = (typeof(pRenderableHash) !== 'string') ? this.options.MainViewportRenderableHash : pRenderableHash;
+		let tmpRenderDestinationAddress = (typeof(pRenderDestinationAddress) !== 'string') ? this.options.MainViewportDestinationAddress : pRenderDestinationAddress;
+		let tmpTemplateDataAddress = (typeof(pTemplateDataAddress) !== 'string') ? this.options.MainViewportDefaultDataAddress : pTemplateDataAddress;
 
 		// Allow the callback to be passed in as the last parameter no matter what
 		let tmpCallback = (typeof(fCallback) === 'function') ? fCallback :
