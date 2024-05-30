@@ -99,6 +99,7 @@ suite
 								_PictApplication.initializeAsync(
 									(pError) =>
 									{
+										_PictApplication.renderAutoViews();
 										return fDone();
 									}
 								)

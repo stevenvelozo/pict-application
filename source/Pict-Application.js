@@ -789,7 +789,30 @@ class PictApplication extends libFableServiceBase
 
 	renderAutoViews()
 	{
-		// Render all views with AutoRender set to true.
+		if (this.pict.LogNoisiness > 0)
+		{
+			this.log.trace(`PictApp [${this.UUID}]::[${this.Hash}] ${this.options.Name} beginning renderAutoViews...`);
+		}
+		// Now walk through any loaded views and sort them by the AutoRender ordinal
+		let tmpLoadedViews = Object.keys(this.pict.views);
+		// Sort the views by their priority
+		// If they are all the default priority 0, it will end up being add order due to JSON Object Property Key order stuff
+		tmpLoadedViews.sort((a, b) => 
+		{
+			return this.pict.views[a].options.AutoRenderOrdinal - this.pict.views[b].options.AutoRenderOrdinal;
+		});
+		for (let i = 0; i < tmpLoadedViews.length; i++)
+		{
+			let tmpView = this.pict.views[tmpLoadedViews[i]];
+			if (tmpView.options.AutoRender)
+			{
+				tmpView.render();
+			}
+		}
+		if (this.pict.LogNoisiness > 0)
+		{
+			this.log.trace(`PictApp [${this.UUID}]::[${this.Hash}] ${this.options.Name} renderAutoViewsAsync complete.`);
+		}
 	}
 	renderAutoViewsAsync(fCallback)
 	{

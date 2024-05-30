@@ -822,12 +822,31 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
         }, {
           key: "renderAutoViews",
           value: function renderAutoViews() {
-            // Render all views with AutoRender set to true.
+            var _this7 = this;
+            if (this.pict.LogNoisiness > 0) {
+              this.log.trace("PictApp [".concat(this.UUID, "]::[").concat(this.Hash, "] ").concat(this.options.Name, " beginning renderAutoViews..."));
+            }
+            // Now walk through any loaded views and sort them by the AutoRender ordinal
+            var tmpLoadedViews = Object.keys(this.pict.views);
+            // Sort the views by their priority
+            // If they are all the default priority 0, it will end up being add order due to JSON Object Property Key order stuff
+            tmpLoadedViews.sort(function (a, b) {
+              return _this7.pict.views[a].options.AutoRenderOrdinal - _this7.pict.views[b].options.AutoRenderOrdinal;
+            });
+            for (var i = 0; i < tmpLoadedViews.length; i++) {
+              var tmpView = this.pict.views[tmpLoadedViews[i]];
+              if (tmpView.options.AutoRender) {
+                tmpView.render();
+              }
+            }
+            if (this.pict.LogNoisiness > 0) {
+              this.log.trace("PictApp [".concat(this.UUID, "]::[").concat(this.Hash, "] ").concat(this.options.Name, " renderAutoViewsAsync complete."));
+            }
           }
         }, {
           key: "renderAutoViewsAsync",
           value: function renderAutoViewsAsync(fCallback) {
-            var _this7 = this;
+            var _this8 = this;
             var tmpAnticipate = this.fable.instantiateServiceProviderWithoutRegistration('Anticipate');
 
             // Allow the callback to be passed in as the last parameter no matter what
@@ -836,7 +855,7 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
               this.log.warn("PictApp [".concat(this.UUID, "]::[").concat(this.Hash, "] ").concat(this.options.Name, " renderAutoViewsAsync was called without a valid callback.  A callback will be generated but this could lead to race conditions."));
               tmpCallback = function tmpCallback(pError) {
                 if (pError) {
-                  _this7.log.error("PictApp [".concat(_this7.UUID, "]::[").concat(_this7.Hash, "] ").concat(_this7.options.Name, " renderAutoViewsAsync Auto Callback Error: ").concat(pError), pError);
+                  _this8.log.error("PictApp [".concat(_this8.UUID, "]::[").concat(_this8.Hash, "] ").concat(_this8.options.Name, " renderAutoViewsAsync Auto Callback Error: ").concat(pError), pError);
                 }
               };
             }
@@ -850,7 +869,7 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
             // Sort the views by their priority
             // If they are all the default priority 0, it will end up being add order due to JSON Object Property Key order stuff
             tmpLoadedViews.sort(function (a, b) {
-              return _this7.pict.views[a].options.AutoRenderOrdinal - _this7.pict.views[b].options.AutoRenderOrdinal;
+              return _this8.pict.views[a].options.AutoRenderOrdinal - _this8.pict.views[b].options.AutoRenderOrdinal;
             });
             for (var i = 0; i < tmpLoadedViews.length; i++) {
               var tmpView = this.pict.views[tmpLoadedViews[i]];
@@ -859,9 +878,9 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
               }
             }
             tmpAnticipate.wait(function (pError) {
-              _this7.lastAutoRenderTimestamp = _this7.fable.log.getTimeStamp();
-              if (_this7.pict.LogNoisiness > 0) {
-                _this7.log.trace("PictApp [".concat(_this7.UUID, "]::[").concat(_this7.Hash, "] ").concat(_this7.options.Name, " renderAutoViewsAsync complete."));
+              _this8.lastAutoRenderTimestamp = _this8.fable.log.getTimeStamp();
+              if (_this8.pict.LogNoisiness > 0) {
+                _this8.log.trace("PictApp [".concat(_this8.UUID, "]::[").concat(_this8.Hash, "] ").concat(_this8.options.Name, " renderAutoViewsAsync complete."));
               }
               return tmpCallback(pError);
             });
