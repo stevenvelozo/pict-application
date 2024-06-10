@@ -1,6 +1,6 @@
 {
     "name": "pict-application",
-    "version": "1.0.17",
+    "version": "1.0.18",
     "description": "",
     "main": "source/Pict-Application.js",
     "scripts": {
@@ -25,7 +25,7 @@
     "homepage": "https://github.com/stevenvelozo/pict-application#readme",
     "devDependencies": {
         "browser-env": "^3.3.0",
-        "pict": "^1.0.179",
+        "pict": "^1.0.188",
         "pict-view": "^1.0.46",
         "quackage": "^1.0.29"
     },

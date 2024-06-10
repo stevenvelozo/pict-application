@@ -1,7 +1,7 @@
 "use strict";
 
-function _defineProperty(obj, key, value) { key = _toPropertyKey(key); if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == typeof i ? i : String(i); }
+function _defineProperty(e, r, t) { return (r = _toPropertyKey(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: !0, configurable: !0, writable: !0 }) : e[r] = t, e; }
+function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == typeof i ? i : i + ""; }
 function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != typeof i) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
 (function (f) {
   if (typeof exports === "object" && typeof module !== "undefined") {
@@ -124,6 +124,7 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
         AutoSolveAfterInitialize: true,
         AutoRenderMainViewportViewAfterInitialize: true,
         AutoRenderViewsAfterInitialize: false,
+        ConfigurationOnlyViews: [],
         Manifests: {},
         // The prefix to prepend on all template destination hashes
         IdentifierAddressPrefix: 'PICT-'
@@ -328,6 +329,14 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
           }
           if (!this.initializeTimestamp) {
             this.onBeforeInitialize();
+            if ('ConfigurationOnlyViews' in this.options) {
+              // Load all the configuration only views
+              for (let i = 0; i < this.options.ConfigurationOnlyViews.length; i++) {
+                let tmpViewIdentifier = typeof this.options.ConfigurationOnlyViews[i].ViewIdentifier === 'undefined' ? "AutoView-".concat(this.fable.getUUID()) : this.options.ConfigurationOnlyViews[i].ViewIdentifier;
+                this.log.info("PictApp [".concat(this.UUID, "]::[").concat(this.Hash, "] ").concat(this.options.Name, " adding configuration only view: ").concat(tmpViewIdentifier));
+                this.pict.addView(tmpViewIdentifier, this.options.ConfigurationOnlyViews[i]);
+              }
+            }
             this.onInitialize();
 
             // Walk through any loaded providers and initialize them as well.
@@ -405,6 +414,14 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
             let tmpAnticipate = this.fable.instantiateServiceProviderWithoutRegistration('Anticipate');
             if (this.pict.LogNoisiness > 3) {
               this.log.trace("PictApp [".concat(this.UUID, "]::[").concat(this.Hash, "] ").concat(this.options.Name, " beginning initialization..."));
+            }
+            if ('ConfigurationOnlyViews' in this.options) {
+              // Load all the configuration only views
+              for (let i = 0; i < this.options.ConfigurationOnlyViews.length; i++) {
+                let tmpViewIdentifier = typeof this.options.ConfigurationOnlyViews[i].ViewIdentifier === 'undefined' ? "AutoView-".concat(this.fable.getUUID()) : this.options.ConfigurationOnlyViews[i].ViewIdentifier;
+                this.log.info("PictApp [".concat(this.UUID, "]::[").concat(this.Hash, "] ").concat(this.options.Name, " adding configuration only view: ").concat(tmpViewIdentifier));
+                this.pict.addView(tmpViewIdentifier, this.options.ConfigurationOnlyViews[i]);
+              }
             }
             tmpAnticipate.anticipate(this.onBeforeInitializeAsync.bind(this));
             tmpAnticipate.anticipate(this.onInitializeAsync.bind(this));

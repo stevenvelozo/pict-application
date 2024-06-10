@@ -15,6 +15,8 @@ const defaultPictSettings = (
 		AutoRenderMainViewportViewAfterInitialize: true,
 		AutoRenderViewsAfterInitialize: false,
 
+		ConfigurationOnlyViews: [],
+
 		Manifests: {},
 		// The prefix to prepend on all template destination hashes
 		IdentifierAddressPrefix: 'PICT-'
@@ -272,6 +274,19 @@ class PictApplication extends libFableServiceBase
 		if (!this.initializeTimestamp)
 		{
 			this.onBeforeInitialize();
+
+			if ('ConfigurationOnlyViews' in this.options)
+			{
+				// Load all the configuration only views
+				for (let i = 0; i < this.options.ConfigurationOnlyViews.length; i++)
+				{
+					let tmpViewIdentifier = (typeof(this.options.ConfigurationOnlyViews[i].ViewIdentifier) === 'undefined') ? `AutoView-${this.fable.getUUID()}` 
+											: this.options.ConfigurationOnlyViews[i].ViewIdentifier;
+					this.log.info(`PictApp [${this.UUID}]::[${this.Hash}] ${this.options.Name} adding configuration only view: ${tmpViewIdentifier}`);
+					this.pict.addView(tmpViewIdentifier, this.options.ConfigurationOnlyViews[i]);
+				}
+			}
+
 			this.onInitialize();
 
 			// Walk through any loaded providers and initialize them as well.
@@ -368,6 +383,18 @@ class PictApplication extends libFableServiceBase
 			if (this.pict.LogNoisiness > 3)
 			{
 				this.log.trace(`PictApp [${this.UUID}]::[${this.Hash}] ${this.options.Name} beginning initialization...`);
+			}
+
+			if ('ConfigurationOnlyViews' in this.options)
+			{
+				// Load all the configuration only views
+				for (let i = 0; i < this.options.ConfigurationOnlyViews.length; i++)
+				{
+					let tmpViewIdentifier = (typeof(this.options.ConfigurationOnlyViews[i].ViewIdentifier) === 'undefined') ? `AutoView-${this.fable.getUUID()}` 
+											: this.options.ConfigurationOnlyViews[i].ViewIdentifier;
+					this.log.info(`PictApp [${this.UUID}]::[${this.Hash}] ${this.options.Name} adding configuration only view: ${tmpViewIdentifier}`);
+					this.pict.addView(tmpViewIdentifier, this.options.ConfigurationOnlyViews[i]);
+				}
 			}
 
 			tmpAnticipate.anticipate(this.onBeforeInitializeAsync.bind(this));

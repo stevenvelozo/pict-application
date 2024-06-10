@@ -1,17 +1,17 @@
 "use strict";
 
 function _callSuper(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct() ? Reflect.construct(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
-function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } else if (call !== void 0) { throw new TypeError("Derived constructors may only return object or undefined"); } return _assertThisInitialized(self); }
-function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+function _possibleConstructorReturn(t, e) { if (e && ("object" == _typeof(e) || "function" == typeof e)) return e; if (void 0 !== e) throw new TypeError("Derived constructors may only return object or undefined"); return _assertThisInitialized(t); }
+function _assertThisInitialized(e) { if (void 0 === e) throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); return e; }
 function _isNativeReflectConstruct() { try { var t = !Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct = function _isNativeReflectConstruct() { return !!t; })(); }
-function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf.bind() : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); Object.defineProperty(subClass, "prototype", { writable: false }); if (superClass) _setPrototypeOf(subClass, superClass); }
-function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, _toPropertyKey(descriptor.key), descriptor); } }
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, "prototype", { writable: false }); return Constructor; }
-function _defineProperty(obj, key, value) { key = _toPropertyKey(key); if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : String(i); }
+function _getPrototypeOf(t) { return _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf.bind() : function (t) { return t.__proto__ || Object.getPrototypeOf(t); }, _getPrototypeOf(t); }
+function _inherits(t, e) { if ("function" != typeof e && null !== e) throw new TypeError("Super expression must either be null or a function"); t.prototype = Object.create(e && e.prototype, { constructor: { value: t, writable: !0, configurable: !0 } }), Object.defineProperty(t, "prototype", { writable: !1 }), e && _setPrototypeOf(t, e); }
+function _setPrototypeOf(t, e) { return _setPrototypeOf = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function (t, e) { return t.__proto__ = e, t; }, _setPrototypeOf(t, e); }
+function _classCallCheck(a, n) { if (!(a instanceof n)) throw new TypeError("Cannot call a class as a function"); }
+function _defineProperties(e, r) { for (var t = 0; t < r.length; t++) { var o = r[t]; o.enumerable = o.enumerable || !1, o.configurable = !0, "value" in o && (o.writable = !0), Object.defineProperty(e, _toPropertyKey(o.key), o); } }
+function _createClass(e, r, t) { return r && _defineProperties(e.prototype, r), t && _defineProperties(e, t), Object.defineProperty(e, "prototype", { writable: !1 }), e; }
+function _defineProperty(e, r, t) { return (r = _toPropertyKey(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: !0, configurable: !0, writable: !0 }) : e[r] = t, e; }
+function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : i + ""; }
 function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
 function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
 (function (f) {
@@ -95,7 +95,7 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
           // The service hash is used to identify the specific instantiation of the service in the services map
           this.Hash = typeof pServiceHash === 'string' ? pServiceHash : !this.fable && typeof pOptions === 'string' ? pOptions : "".concat(this.UUID);
         }
-        _createClass(FableServiceProviderBase, [{
+        return _createClass(FableServiceProviderBase, [{
           key: "connectFable",
           value: function connectFable(pFable) {
             if (_typeof(pFable) !== 'object' || !pFable.isFable) {
@@ -118,7 +118,6 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
             return true;
           }
         }]);
-        return FableServiceProviderBase;
       }();
       _defineProperty(FableServiceProviderBase, "isFableService", true);
       module.exports = FableServiceProviderBase;
@@ -139,12 +138,12 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
         AutoSolveAfterInitialize: true,
         AutoRenderMainViewportViewAfterInitialize: true,
         AutoRenderViewsAfterInitialize: false,
+        ConfigurationOnlyViews: [],
         Manifests: {},
         // The prefix to prepend on all template destination hashes
         IdentifierAddressPrefix: 'PICT-'
       };
       var PictApplication = /*#__PURE__*/function (_libFableServiceBase) {
-        _inherits(PictApplication, _libFableServiceBase);
         function PictApplication(pFable, pOptions, pServiceHash) {
           var _this;
           _classCallCheck(this, PictApplication);
@@ -177,7 +176,8 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
         /* -------------------------------------------------------------------------- */
         /*                     Code Section: Solve All Views                          */
         /* -------------------------------------------------------------------------- */
-        _createClass(PictApplication, [{
+        _inherits(PictApplication, _libFableServiceBase);
+        return _createClass(PictApplication, [{
           key: "onPreSolve",
           value: function onPreSolve() {
             if (this.pict.LogNoisiness > 3) {
@@ -378,13 +378,21 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
             }
             if (!this.initializeTimestamp) {
               this.onBeforeInitialize();
+              if ('ConfigurationOnlyViews' in this.options) {
+                // Load all the configuration only views
+                for (var i = 0; i < this.options.ConfigurationOnlyViews.length; i++) {
+                  var tmpViewIdentifier = typeof this.options.ConfigurationOnlyViews[i].ViewIdentifier === 'undefined' ? "AutoView-".concat(this.fable.getUUID()) : this.options.ConfigurationOnlyViews[i].ViewIdentifier;
+                  this.log.info("PictApp [".concat(this.UUID, "]::[").concat(this.Hash, "] ").concat(this.options.Name, " adding configuration only view: ").concat(tmpViewIdentifier));
+                  this.pict.addView(tmpViewIdentifier, this.options.ConfigurationOnlyViews[i]);
+                }
+              }
               this.onInitialize();
 
               // Walk through any loaded providers and initialize them as well.
               var tmpLoadedProviders = Object.keys(this.pict.providers);
               var tmpProvidersToInitialize = [];
-              for (var i = 0; i < tmpLoadedProviders.length; i++) {
-                var tmpProvider = this.pict.providers[tmpLoadedProviders[i]];
+              for (var _i7 = 0; _i7 < tmpLoadedProviders.length; _i7++) {
+                var tmpProvider = this.pict.providers[tmpLoadedProviders[_i7]];
                 if (tmpProvider.options.AutoInitialize) {
                   tmpProvidersToInitialize.push(tmpProvider);
                 }
@@ -393,15 +401,15 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
               tmpProvidersToInitialize.sort(function (a, b) {
                 return a.options.AutoInitializeOrdinal - b.options.AutoInitializeOrdinal;
               });
-              for (var _i7 = 0; _i7 < tmpProvidersToInitialize.length; _i7++) {
-                tmpProvidersToInitialize[_i7].initialize();
+              for (var _i8 = 0; _i8 < tmpProvidersToInitialize.length; _i8++) {
+                tmpProvidersToInitialize[_i8].initialize();
               }
 
               // Now walk through any loaded views and initialize them as well.
               var tmpLoadedViews = Object.keys(this.pict.views);
               var tmpViewsToInitialize = [];
-              for (var _i8 = 0; _i8 < tmpLoadedViews.length; _i8++) {
-                var tmpView = this.pict.views[tmpLoadedViews[_i8]];
+              for (var _i9 = 0; _i9 < tmpLoadedViews.length; _i9++) {
+                var tmpView = this.pict.views[tmpLoadedViews[_i9]];
                 if (tmpView.options.AutoInitialize) {
                   tmpViewsToInitialize.push(tmpView);
                 }
@@ -410,8 +418,8 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
               tmpViewsToInitialize.sort(function (a, b) {
                 return a.options.AutoInitializeOrdinal - b.options.AutoInitializeOrdinal;
               });
-              for (var _i9 = 0; _i9 < tmpViewsToInitialize.length; _i9++) {
-                tmpViewsToInitialize[_i9].initialize();
+              for (var _i10 = 0; _i10 < tmpViewsToInitialize.length; _i10++) {
+                tmpViewsToInitialize[_i10].initialize();
               }
               this.onAfterInitialize();
               if (this.options.AutoSolveAfterInitialize) {
@@ -459,14 +467,22 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
               if (this.pict.LogNoisiness > 3) {
                 this.log.trace("PictApp [".concat(this.UUID, "]::[").concat(this.Hash, "] ").concat(this.options.Name, " beginning initialization..."));
               }
+              if ('ConfigurationOnlyViews' in this.options) {
+                // Load all the configuration only views
+                for (var i = 0; i < this.options.ConfigurationOnlyViews.length; i++) {
+                  var tmpViewIdentifier = typeof this.options.ConfigurationOnlyViews[i].ViewIdentifier === 'undefined' ? "AutoView-".concat(this.fable.getUUID()) : this.options.ConfigurationOnlyViews[i].ViewIdentifier;
+                  this.log.info("PictApp [".concat(this.UUID, "]::[").concat(this.Hash, "] ").concat(this.options.Name, " adding configuration only view: ").concat(tmpViewIdentifier));
+                  this.pict.addView(tmpViewIdentifier, this.options.ConfigurationOnlyViews[i]);
+                }
+              }
               tmpAnticipate.anticipate(this.onBeforeInitializeAsync.bind(this));
               tmpAnticipate.anticipate(this.onInitializeAsync.bind(this));
 
               // Walk through any loaded providers and solve them as well.
               var tmpLoadedProviders = Object.keys(this.pict.providers);
               var tmpProvidersToInitialize = [];
-              for (var i = 0; i < tmpLoadedProviders.length; i++) {
-                var tmpProvider = this.pict.providers[tmpLoadedProviders[i]];
+              for (var _i11 = 0; _i11 < tmpLoadedProviders.length; _i11++) {
+                var tmpProvider = this.pict.providers[tmpLoadedProviders[_i11]];
                 if (tmpProvider.options.AutoInitialize) {
                   tmpProvidersToInitialize.push(tmpProvider);
                 }
@@ -475,16 +491,16 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
               tmpProvidersToInitialize.sort(function (a, b) {
                 return a.options.AutoInitializeOrdinal - b.options.AutoInitializeOrdinal;
               });
-              for (var _i10 = 0; _i10 < tmpProvidersToInitialize.length; _i10++) {
-                tmpAnticipate.anticipate(tmpProvidersToInitialize[_i10].initializeAsync.bind(tmpProvidersToInitialize[_i10]));
+              for (var _i12 = 0; _i12 < tmpProvidersToInitialize.length; _i12++) {
+                tmpAnticipate.anticipate(tmpProvidersToInitialize[_i12].initializeAsync.bind(tmpProvidersToInitialize[_i12]));
               }
 
               // Now walk through any loaded views and initialize them as well.
               // TODO: Some optimization cleverness could be gained by grouping them into a parallelized async operation, by ordinal.
               var tmpLoadedViews = Object.keys(this.pict.views);
               var tmpViewsToInitialize = [];
-              for (var _i11 = 0; _i11 < tmpLoadedViews.length; _i11++) {
-                var tmpView = this.pict.views[tmpLoadedViews[_i11]];
+              for (var _i13 = 0; _i13 < tmpLoadedViews.length; _i13++) {
+                var tmpView = this.pict.views[tmpLoadedViews[_i13]];
                 if (tmpView.options.AutoInitialize) {
                   tmpViewsToInitialize.push(tmpView);
                 }
@@ -494,8 +510,8 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
               tmpViewsToInitialize.sort(function (a, b) {
                 return a.options.AutoInitializeOrdinal - b.options.AutoInitializeOrdinal;
               });
-              for (var _i12 = 0; _i12 < tmpViewsToInitialize.length; _i12++) {
-                var _tmpView = tmpViewsToInitialize[_i12];
+              for (var _i14 = 0; _i14 < tmpViewsToInitialize.length; _i14++) {
+                var _tmpView = tmpViewsToInitialize[_i14];
                 tmpAnticipate.anticipate(_tmpView.initializeAsync.bind(_tmpView));
               }
               tmpAnticipate.anticipate(this.onAfterInitializeAsync.bind(this));
@@ -584,8 +600,8 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
               var tmpView = this.pict.views[tmpLoadedViews[i]];
               tmpViewsToMarshalFromViews.push(tmpView);
             }
-            for (var _i13 = 0; _i13 < tmpViewsToMarshalFromViews.length; _i13++) {
-              tmpViewsToMarshalFromViews[_i13].marshalFromView();
+            for (var _i15 = 0; _i15 < tmpViewsToMarshalFromViews.length; _i15++) {
+              tmpViewsToMarshalFromViews[_i15].marshalFromView();
             }
             this.onMarshalFromViews();
             this.onAfterMarshalFromViews();
@@ -616,8 +632,8 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
               var tmpView = this.pict.views[tmpLoadedViews[i]];
               tmpViewsToMarshalFromViews.push(tmpView);
             }
-            for (var _i14 = 0; _i14 < tmpViewsToMarshalFromViews.length; _i14++) {
-              tmpAnticipate.anticipate(tmpViewsToMarshalFromViews[_i14].marshalFromViewAsync.bind(tmpViewsToMarshalFromViews[_i14]));
+            for (var _i16 = 0; _i16 < tmpViewsToMarshalFromViews.length; _i16++) {
+              tmpAnticipate.anticipate(tmpViewsToMarshalFromViews[_i16].marshalFromViewAsync.bind(tmpViewsToMarshalFromViews[_i16]));
             }
             tmpAnticipate.anticipate(this.onMarshalFromViewsAsync.bind(this));
             tmpAnticipate.anticipate(this.onAfterMarshalFromViewsAsync.bind(this));
@@ -689,8 +705,8 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
               var tmpView = this.pict.views[tmpLoadedViews[i]];
               tmpViewsToMarshalToViews.push(tmpView);
             }
-            for (var _i15 = 0; _i15 < tmpViewsToMarshalToViews.length; _i15++) {
-              tmpViewsToMarshalToViews[_i15].marshalToView();
+            for (var _i17 = 0; _i17 < tmpViewsToMarshalToViews.length; _i17++) {
+              tmpViewsToMarshalToViews[_i17].marshalToView();
             }
             this.onMarshalToViews();
             this.onAfterMarshalToViews();
@@ -721,8 +737,8 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
               var tmpView = this.pict.views[tmpLoadedViews[i]];
               tmpViewsToMarshalToViews.push(tmpView);
             }
-            for (var _i16 = 0; _i16 < tmpViewsToMarshalToViews.length; _i16++) {
-              tmpAnticipate.anticipate(tmpViewsToMarshalToViews[_i16].marshalToViewAsync.bind(tmpViewsToMarshalToViews[_i16]));
+            for (var _i18 = 0; _i18 < tmpViewsToMarshalToViews.length; _i18++) {
+              tmpAnticipate.anticipate(tmpViewsToMarshalToViews[_i18].marshalToViewAsync.bind(tmpViewsToMarshalToViews[_i18]));
             }
             tmpAnticipate.anticipate(this.onMarshalToViewsAsync.bind(this));
             tmpAnticipate.anticipate(this.onAfterMarshalToViewsAsync.bind(this));
@@ -886,7 +902,6 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
             });
           }
         }]);
-        return PictApplication;
       }(libFableServiceBase);
       module.exports = PictApplication;
     }, {
