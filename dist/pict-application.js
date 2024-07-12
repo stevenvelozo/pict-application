@@ -796,6 +796,9 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
             return tmpCallback(pError);
           });
         }
+        get isPictApplication() {
+          return true;
+        }
       }
       module.exports = PictApplication;
     }, {

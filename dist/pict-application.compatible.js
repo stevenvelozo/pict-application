@@ -901,6 +901,11 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
               return tmpCallback(pError);
             });
           }
+        }, {
+          key: "isPictApplication",
+          get: function get() {
+            return true;
+          }
         }]);
       }(libFableServiceBase);
       module.exports = PictApplication;

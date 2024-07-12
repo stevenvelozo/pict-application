@@ -899,6 +899,11 @@ class PictApplication extends libFableServiceBase
 				return tmpCallback(pError);
 			});
 	}
+
+	get isPictApplication()
+	{
+		return true;
+	}
 }
 
 module.exports = PictApplication;
