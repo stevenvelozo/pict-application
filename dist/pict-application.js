@@ -678,6 +678,16 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
         /* -------------------------------------------------------------------------- */
         /*                     Code Section: Render View                              */
         /* -------------------------------------------------------------------------- */
+        onBeforeRender() {
+          if (this.pict.LogNoisiness > 3) {
+            this.log.trace("PictApp [".concat(this.UUID, "]::[").concat(this.Hash, "] ").concat(this.options.Name, " onBeforeRender:"));
+          }
+          return true;
+        }
+        onBeforeRenderAsync(fCallback) {
+          this.onBeforeRender();
+          return fCallback();
+        }
         render(pViewIdentifier, pRenderableHash, pRenderDestinationAddress, pTemplateDataAddress) {
           let tmpViewIdentifier = typeof pViewIdentifier !== 'string' ? this.options.MainViewportViewIdentifier : pViewIdentifier;
           let tmpRenderableHash = typeof pRenderableHash !== 'string' ? this.options.MainViewportRenderableHash : pRenderableHash;
@@ -686,6 +696,7 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
           if (this.pict.LogControlFlow) {
             this.log.trace("PICT-ControlFlow APPLICATION [".concat(this.UUID, "]::[").concat(this.Hash, "] ").concat(this.options.Name, " VIEW Renderable[").concat(tmpRenderableHash, "] Destination[").concat(tmpRenderDestinationAddress, "] TemplateDataAddress[").concat(tmpTemplateDataAddress, "] render:"));
           }
+          this.onBeforeRender();
 
           // Now get the view (by hash) from the loaded views
           let tmpView = typeof tmpViewIdentifier === 'string' ? this.servicesMap.PictView[tmpViewIdentifier] : false;
@@ -693,13 +704,20 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
             this.log.error("PictApp [".concat(this.UUID, "]::[").concat(this.Hash, "] ").concat(this.options.Name, " could not render from View ").concat(tmpViewIdentifier, " because it is not a valid view."));
             return false;
           }
-          return tmpView.render(tmpRenderableHash, tmpRenderDestinationAddress, tmpTemplateDataAddress);
+          this.onRender();
+          tmpView.render(tmpRenderableHash, tmpRenderDestinationAddress, tmpTemplateDataAddress);
+          this.onAfterRender();
+          return true;
         }
-        renderMainViewport() {
-          if (this.pict.LogControlFlow) {
-            this.log.trace("PICT-ControlFlow APPLICATION [".concat(this.UUID, "]::[").concat(this.Hash, "] ").concat(this.options.Name, " renderMainViewport:"));
+        onRender() {
+          if (this.pict.LogNoisiness > 3) {
+            this.log.trace("PictApp [".concat(this.UUID, "]::[").concat(this.Hash, "] ").concat(this.options.Name, " onRender:"));
           }
-          return this.render();
+          return true;
+        }
+        onRenderAsync(fCallback) {
+          this.onRender();
+          return fCallback();
         }
         renderAsync(pViewIdentifier, pRenderableHash, pRenderDestinationAddress, pTemplateDataAddress, fCallback) {
           let tmpViewIdentifier = typeof pViewIdentifier !== 'string' ? this.options.MainViewportViewIdentifier : pViewIdentifier;
@@ -720,6 +738,8 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
           if (this.pict.LogControlFlow) {
             this.log.trace("PICT-ControlFlow APPLICATION [".concat(this.UUID, "]::[").concat(this.Hash, "] ").concat(this.options.Name, " VIEW Renderable[").concat(tmpRenderableHash, "] Destination[").concat(tmpRenderDestinationAddress, "] TemplateDataAddress[").concat(tmpTemplateDataAddress, "] renderAsync:"));
           }
+          let tmpRenderAnticipate = this.fable.newAnticipate();
+          tmpRenderAnticipate.anticipate(this.onBeforeRenderAsync.bind(this));
           let tmpView = typeof tmpViewIdentifier === 'string' ? this.servicesMap.PictView[tmpViewIdentifier] : false;
           if (!tmpView) {
             let tmpErrorMessage = "PictApp [".concat(this.UUID, "]::[").concat(this.Hash, "] ").concat(this.options.Name, " could not asynchronously render from View ").concat(tmpViewIdentifier, " because it is not a valid view.");
@@ -728,7 +748,28 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
             }
             return tmpCallback(new Error(tmpErrorMessage));
           }
-          return tmpView.renderAsync(tmpRenderableHash, tmpRenderDestinationAddress, tmpTemplateDataAddress, tmpCallback);
+          tmpRenderAnticipate.anticipate(this.onRenderAsync.bind(this));
+          tmpRenderAnticipate.anticipate(fNext => {
+            tmpView.renderAsync.call(tmpView, tmpRenderableHash, tmpRenderDestinationAddress, tmpTemplateDataAddress, fNext);
+          });
+          tmpRenderAnticipate.anticipate(this.onAfterRenderAsync.bind(this));
+          return tmpRenderAnticipate.wait(tmpCallback);
+        }
+        onAfterRender() {
+          if (this.pict.LogNoisiness > 3) {
+            this.log.trace("PictApp [".concat(this.UUID, "]::[").concat(this.Hash, "] ").concat(this.options.Name, " onAfterRender:"));
+          }
+          return true;
+        }
+        onAfterRenderAsync(fCallback) {
+          this.onAfterRender();
+          return fCallback();
+        }
+        renderMainViewport() {
+          if (this.pict.LogControlFlow) {
+            this.log.trace("PICT-ControlFlow APPLICATION [".concat(this.UUID, "]::[").concat(this.Hash, "] ").concat(this.options.Name, " renderMainViewport:"));
+          }
+          return this.render();
         }
         renderMainViewportAsync(fCallback) {
           if (this.pict.LogControlFlow) {

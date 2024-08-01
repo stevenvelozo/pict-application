@@ -727,6 +727,20 @@ class PictApplication extends libFableServiceBase
 	/* -------------------------------------------------------------------------- */
 	/*                     Code Section: Render View                              */
 	/* -------------------------------------------------------------------------- */
+	onBeforeRender()
+	{
+		if (this.pict.LogNoisiness > 3)
+		{
+			this.log.trace(`PictApp [${this.UUID}]::[${this.Hash}] ${this.options.Name} onBeforeRender:`);
+		}
+		return true;
+	}
+	onBeforeRenderAsync(fCallback)
+	{
+		this.onBeforeRender();
+		return fCallback();
+	}
+
 	render(pViewIdentifier, pRenderableHash, pRenderDestinationAddress, pTemplateDataAddress)
 	{
 		let tmpViewIdentifier = (typeof(pViewIdentifier) !== 'string') ? this.options.MainViewportViewIdentifier : pViewIdentifier;
@@ -739,6 +753,8 @@ class PictApplication extends libFableServiceBase
 			this.log.trace(`PICT-ControlFlow APPLICATION [${this.UUID}]::[${this.Hash}] ${this.options.Name} VIEW Renderable[${tmpRenderableHash}] Destination[${tmpRenderDestinationAddress}] TemplateDataAddress[${tmpTemplateDataAddress}] render:`);
 		}
 
+		this.onBeforeRender();
+
 		// Now get the view (by hash) from the loaded views
 		let tmpView = (typeof (tmpViewIdentifier) === 'string') ? this.servicesMap.PictView[tmpViewIdentifier] : false;
 		if (!tmpView)
@@ -747,16 +763,26 @@ class PictApplication extends libFableServiceBase
 			return false;
 		}
 
-		return tmpView.render(tmpRenderableHash, tmpRenderDestinationAddress, tmpTemplateDataAddress);
-	}
-	renderMainViewport()
-	{
-		if (this.pict.LogControlFlow)
-		{
-			this.log.trace(`PICT-ControlFlow APPLICATION [${this.UUID}]::[${this.Hash}] ${this.options.Name} renderMainViewport:`);
-		}
+		this.onRender();
 
-		return this.render();
+		tmpView.render(tmpRenderableHash, tmpRenderDestinationAddress, tmpTemplateDataAddress);
+
+		this.onAfterRender();
+
+		return true;
+	}
+	onRender()
+	{
+		if (this.pict.LogNoisiness > 3)
+		{
+			this.log.trace(`PictApp [${this.UUID}]::[${this.Hash}] ${this.options.Name} onRender:`);
+		}
+		return true;
+	}
+	onRenderAsync(fCallback)
+	{
+		this.onRender();
+		return fCallback();
 	}
 
 	renderAsync(pViewIdentifier, pRenderableHash, pRenderDestinationAddress, pTemplateDataAddress, fCallback)
@@ -791,6 +817,10 @@ class PictApplication extends libFableServiceBase
 			this.log.trace(`PICT-ControlFlow APPLICATION [${this.UUID}]::[${this.Hash}] ${this.options.Name} VIEW Renderable[${tmpRenderableHash}] Destination[${tmpRenderDestinationAddress}] TemplateDataAddress[${tmpTemplateDataAddress}] renderAsync:`);
 		}
 
+		let tmpRenderAnticipate = this.fable.newAnticipate();
+
+		tmpRenderAnticipate.anticipate(this.onBeforeRenderAsync.bind(this));
+
 		let tmpView = (typeof (tmpViewIdentifier) === 'string') ? this.servicesMap.PictView[tmpViewIdentifier] : false;
 		if (!tmpView)
 		{
@@ -802,7 +832,42 @@ class PictApplication extends libFableServiceBase
 			return tmpCallback(new Error(tmpErrorMessage));
 		}
 
-		return tmpView.renderAsync(tmpRenderableHash, tmpRenderDestinationAddress, tmpTemplateDataAddress, tmpCallback);
+		tmpRenderAnticipate.anticipate(this.onRenderAsync.bind(this));
+
+		tmpRenderAnticipate.anticipate(
+			(fNext) =>
+			{
+				tmpView.renderAsync.call(tmpView, tmpRenderableHash, tmpRenderDestinationAddress, tmpTemplateDataAddress, fNext);
+			});
+
+		tmpRenderAnticipate.anticipate(this.onAfterRenderAsync.bind(this));
+
+		return tmpRenderAnticipate.wait(tmpCallback);
+	}
+
+	onAfterRender()
+	{
+		if (this.pict.LogNoisiness > 3)
+		{
+			this.log.trace(`PictApp [${this.UUID}]::[${this.Hash}] ${this.options.Name} onAfterRender:`);
+		}
+		return true;
+	}
+	onAfterRenderAsync(fCallback)
+	{
+		this.onAfterRender();
+		return fCallback();
+	}
+
+
+	renderMainViewport()
+	{
+		if (this.pict.LogControlFlow)
+		{
+			this.log.trace(`PICT-ControlFlow APPLICATION [${this.UUID}]::[${this.Hash}] ${this.options.Name} renderMainViewport:`);
+		}
+
+		return this.render();
 	}
 	renderMainViewportAsync(fCallback)
 	{
@@ -813,7 +878,6 @@ class PictApplication extends libFableServiceBase
 
 		return this.renderAsync(fCallback);
 	}
-
 	renderAutoViews()
 	{
 		if (this.pict.LogNoisiness > 0)

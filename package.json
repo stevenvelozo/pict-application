@@ -1,7 +1,7 @@
 {
     "name": "pict-application",
-    "version": "1.0.19",
-    "description": "",
+    "version": "1.0.20",
+    "description": "Application base class for a pict view-based application",
     "main": "source/Pict-Application.js",
     "scripts": {
         "test": "npx mocha -u tdd -R spec",
@@ -25,9 +25,9 @@
     "homepage": "https://github.com/stevenvelozo/pict-application#readme",
     "devDependencies": {
         "browser-env": "^3.3.0",
-        "pict": "^1.0.204",
-        "pict-view": "^1.0.49",
-        "quackage": "^1.0.30"
+        "pict": "^1.0.210",
+        "pict-view": "^1.0.51",
+        "quackage": "^1.0.31"
     },
     "mocha": {
         "diff": true,

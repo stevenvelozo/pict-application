@@ -769,6 +769,20 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
           /*                     Code Section: Render View                              */
           /* -------------------------------------------------------------------------- */
         }, {
+          key: "onBeforeRender",
+          value: function onBeforeRender() {
+            if (this.pict.LogNoisiness > 3) {
+              this.log.trace("PictApp [".concat(this.UUID, "]::[").concat(this.Hash, "] ").concat(this.options.Name, " onBeforeRender:"));
+            }
+            return true;
+          }
+        }, {
+          key: "onBeforeRenderAsync",
+          value: function onBeforeRenderAsync(fCallback) {
+            this.onBeforeRender();
+            return fCallback();
+          }
+        }, {
           key: "render",
           value: function render(pViewIdentifier, pRenderableHash, pRenderDestinationAddress, pTemplateDataAddress) {
             var tmpViewIdentifier = typeof pViewIdentifier !== 'string' ? this.options.MainViewportViewIdentifier : pViewIdentifier;
@@ -778,6 +792,7 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
             if (this.pict.LogControlFlow) {
               this.log.trace("PICT-ControlFlow APPLICATION [".concat(this.UUID, "]::[").concat(this.Hash, "] ").concat(this.options.Name, " VIEW Renderable[").concat(tmpRenderableHash, "] Destination[").concat(tmpRenderDestinationAddress, "] TemplateDataAddress[").concat(tmpTemplateDataAddress, "] render:"));
             }
+            this.onBeforeRender();
 
             // Now get the view (by hash) from the loaded views
             var tmpView = typeof tmpViewIdentifier === 'string' ? this.servicesMap.PictView[tmpViewIdentifier] : false;
@@ -785,15 +800,24 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
               this.log.error("PictApp [".concat(this.UUID, "]::[").concat(this.Hash, "] ").concat(this.options.Name, " could not render from View ").concat(tmpViewIdentifier, " because it is not a valid view."));
               return false;
             }
-            return tmpView.render(tmpRenderableHash, tmpRenderDestinationAddress, tmpTemplateDataAddress);
+            this.onRender();
+            tmpView.render(tmpRenderableHash, tmpRenderDestinationAddress, tmpTemplateDataAddress);
+            this.onAfterRender();
+            return true;
           }
         }, {
-          key: "renderMainViewport",
-          value: function renderMainViewport() {
-            if (this.pict.LogControlFlow) {
-              this.log.trace("PICT-ControlFlow APPLICATION [".concat(this.UUID, "]::[").concat(this.Hash, "] ").concat(this.options.Name, " renderMainViewport:"));
+          key: "onRender",
+          value: function onRender() {
+            if (this.pict.LogNoisiness > 3) {
+              this.log.trace("PictApp [".concat(this.UUID, "]::[").concat(this.Hash, "] ").concat(this.options.Name, " onRender:"));
             }
-            return this.render();
+            return true;
+          }
+        }, {
+          key: "onRenderAsync",
+          value: function onRenderAsync(fCallback) {
+            this.onRender();
+            return fCallback();
           }
         }, {
           key: "renderAsync",
@@ -817,6 +841,8 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
             if (this.pict.LogControlFlow) {
               this.log.trace("PICT-ControlFlow APPLICATION [".concat(this.UUID, "]::[").concat(this.Hash, "] ").concat(this.options.Name, " VIEW Renderable[").concat(tmpRenderableHash, "] Destination[").concat(tmpRenderDestinationAddress, "] TemplateDataAddress[").concat(tmpTemplateDataAddress, "] renderAsync:"));
             }
+            var tmpRenderAnticipate = this.fable.newAnticipate();
+            tmpRenderAnticipate.anticipate(this.onBeforeRenderAsync.bind(this));
             var tmpView = typeof tmpViewIdentifier === 'string' ? this.servicesMap.PictView[tmpViewIdentifier] : false;
             if (!tmpView) {
               var tmpErrorMessage = "PictApp [".concat(this.UUID, "]::[").concat(this.Hash, "] ").concat(this.options.Name, " could not asynchronously render from View ").concat(tmpViewIdentifier, " because it is not a valid view.");
@@ -825,7 +851,34 @@ function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == 
               }
               return tmpCallback(new Error(tmpErrorMessage));
             }
-            return tmpView.renderAsync(tmpRenderableHash, tmpRenderDestinationAddress, tmpTemplateDataAddress, tmpCallback);
+            tmpRenderAnticipate.anticipate(this.onRenderAsync.bind(this));
+            tmpRenderAnticipate.anticipate(function (fNext) {
+              tmpView.renderAsync.call(tmpView, tmpRenderableHash, tmpRenderDestinationAddress, tmpTemplateDataAddress, fNext);
+            });
+            tmpRenderAnticipate.anticipate(this.onAfterRenderAsync.bind(this));
+            return tmpRenderAnticipate.wait(tmpCallback);
+          }
+        }, {
+          key: "onAfterRender",
+          value: function onAfterRender() {
+            if (this.pict.LogNoisiness > 3) {
+              this.log.trace("PictApp [".concat(this.UUID, "]::[").concat(this.Hash, "] ").concat(this.options.Name, " onAfterRender:"));
+            }
+            return true;
+          }
+        }, {
+          key: "onAfterRenderAsync",
+          value: function onAfterRenderAsync(fCallback) {
+            this.onAfterRender();
+            return fCallback();
+          }
+        }, {
+          key: "renderMainViewport",
+          value: function renderMainViewport() {
+            if (this.pict.LogControlFlow) {
+              this.log.trace("PICT-ControlFlow APPLICATION [".concat(this.UUID, "]::[").concat(this.Hash, "] ").concat(this.options.Name, " renderMainViewport:"));
+            }
+            return this.render();
           }
         }, {
           key: "renderMainViewportAsync",
