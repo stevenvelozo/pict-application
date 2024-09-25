@@ -1,6 +1,6 @@
 {
     "name": "pict-application",
-    "version": "1.0.20",
+    "version": "1.0.21",
     "description": "Application base class for a pict view-based application",
     "main": "source/Pict-Application.js",
     "scripts": {
@@ -25,9 +25,9 @@
     "homepage": "https://github.com/stevenvelozo/pict-application#readme",
     "devDependencies": {
         "browser-env": "^3.3.0",
-        "pict": "^1.0.210",
-        "pict-view": "^1.0.51",
-        "quackage": "^1.0.31"
+        "pict": "^1.0.215",
+        "pict-view": "^1.0.54",
+        "quackage": "^1.0.33"
     },
     "mocha": {
         "diff": true,
@@ -48,6 +48,6 @@
         ]
     },
     "dependencies": {
-        "fable-serviceproviderbase": "^3.0.13"
+        "fable-serviceproviderbase": "^3.0.15"
     }
 }
