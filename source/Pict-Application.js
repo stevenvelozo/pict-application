@@ -1,5 +1,7 @@
 const libFableServiceBase = require('fable-serviceproviderbase')
 
+const libPackage = require('../package.json');
+
 const defaultPictSettings = (
 	{
 		Name: 'DefaultPictApplication',
@@ -29,6 +31,8 @@ class PictApplication extends libFableServiceBase
 		let tmpOptions = Object.assign({}, JSON.parse(JSON.stringify(defaultPictSettings)), pOptions);
 		super(pFable, tmpOptions, pServiceHash);
 		this.serviceType = 'PictApplication';
+		/** @type {Object} */
+		this._Package = libPackage;
 
 		// Convenience and consistency naming
 		this.pict = this.fable;
