@@ -160,7 +160,56 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
       "../package.json": 1
     }],
     3: [function (require, module, exports) {
+      module.exports = {
+        "name": "pict-application",
+        "version": "1.0.22",
+        "description": "Application base class for a pict view-based application",
+        "main": "source/Pict-Application.js",
+        "scripts": {
+          "test": "npx mocha -u tdd -R spec",
+          "start": "node source/Pict-Application.js",
+          "coverage": "npx nyc --reporter=lcov --reporter=text-lcov npx mocha -- -u tdd -R spec",
+          "build": "npx quack build",
+          "docker-dev-build": "docker build ./ -f Dockerfile_LUXURYCode -t pict-application-image:local",
+          "docker-dev-run": "docker run -it -d --name pict-application-dev -p 30001:8080 -p 38086:8086 -v \"$PWD/.config:/home/coder/.config\"  -v \"$PWD:/home/coder/pict-application\" -u \"$(id -u):$(id -g)\" -e \"DOCKER_USER=$USER\" pict-application-image:local",
+          "docker-dev-shell": "docker exec -it pict-application-dev /bin/bash",
+          "tests": "npx mocha -u tdd --exit -R spec --grep"
+        },
+        "repository": {
+          "type": "git",
+          "url": "git+https://github.com/stevenvelozo/pict-application.git"
+        },
+        "author": "steven velozo <steven@velozo.com>",
+        "license": "MIT",
+        "bugs": {
+          "url": "https://github.com/stevenvelozo/pict-application/issues"
+        },
+        "homepage": "https://github.com/stevenvelozo/pict-application#readme",
+        "devDependencies": {
+          "browser-env": "^3.3.0",
+          "pict": "^1.0.226",
+          "pict-view": "^1.0.55",
+          "quackage": "^1.0.36"
+        },
+        "mocha": {
+          "diff": true,
+          "extension": ["js"],
+          "package": "./package.json",
+          "reporter": "spec",
+          "slow": "75",
+          "timeout": "5000",
+          "ui": "tdd",
+          "watch-files": ["source/**/*.js", "test/**/*.js"],
+          "watch-ignore": ["lib/vendor"]
+        },
+        "dependencies": {
+          "fable-serviceproviderbase": "^3.0.15"
+        }
+      };
+    }, {}],
+    4: [function (require, module, exports) {
       const libFableServiceBase = require('fable-serviceproviderbase');
+      const libPackage = require('../package.json');
       const defaultPictSettings = {
         Name: 'DefaultPictApplication',
         // The main "viewport" is the view that is used to host our application
@@ -182,6 +231,8 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
           let tmpOptions = Object.assign({}, JSON.parse(JSON.stringify(defaultPictSettings)), pOptions);
           super(pFable, tmpOptions, pServiceHash);
           this.serviceType = 'PictApplication';
+          /** @type {Object} */
+          this._Package = libPackage;
 
           // Convenience and consistency naming
           this.pict = this.fable;
@@ -891,7 +942,8 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
       }
       module.exports = PictApplication;
     }, {
+      "../package.json": 3,
       "fable-serviceproviderbase": 2
     }]
-  }, {}, [3])(3);
+  }, {}, [4])(4);
 });
