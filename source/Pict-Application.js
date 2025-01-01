@@ -24,12 +24,36 @@ const defaultPictSettings = (
 		IdentifierAddressPrefix: 'PICT-'
 	});
 
+/**
+ * Base class for pict applications.
+ */
 class PictApplication extends libFableServiceBase
 {
+	/**
+	 * @param {import('fable')} pFable
+	 * @param {any} [pOptions]
+	 * @param {string} [pServiceHash]
+	 */
 	constructor(pFable, pOptions, pServiceHash)
 	{
 		let tmpOptions = Object.assign({}, JSON.parse(JSON.stringify(defaultPictSettings)), pOptions);
 		super(pFable, tmpOptions, pServiceHash);
+
+		/** @type {any} */
+		this.options;
+		/** @type {any} */
+		this.log;
+		/** @type {import('pict') & import('fable')} */
+		this.fable;
+		/** @type {string} */
+		this.UUID;
+		/** @type {string} */
+		this.Hash;
+		/**
+		 * @type {{ [key: string]: any }}
+		 */
+		this.servicesMap;
+
 		this.serviceType = 'PictApplication';
 		/** @type {Object} */
 		this._Package = libPackage;
@@ -39,11 +63,16 @@ class PictApplication extends libFableServiceBase
 		// Wire in the essential Pict state
 		this.AppData = this.fable.AppData;
 
-		this.initializeTimestamp = false;
-		this.lastSolvedTimestamp = false;
-		this.lastMarshalFromViewsTimestamp = false;
-		this.lastMarshalToViewsTimestamp = false;
-		this.lastAutoRenderTimestamp = false;
+		/** @type {number} */
+		this.initializeTimestamp;
+		/** @type {number} */
+		this.lastSolvedTimestamp;
+		/** @type {number} */
+		this.lastMarshalFromViewsTimestamp;
+		/** @type {number} */
+		this.lastMarshalToViewsTimestamp;
+		/** @type {number} */
+		this.lastAutoRenderTimestamp;
 
 		// Load all the manifests for the application
 		let tmpManifestKeys = Object.keys(this.options.Manifests);
@@ -61,6 +90,9 @@ class PictApplication extends libFableServiceBase
 	/* -------------------------------------------------------------------------- */
 	/*                     Code Section: Solve All Views                          */
 	/* -------------------------------------------------------------------------- */
+	/**
+	 * @return {boolean}
+	 */
 	onPreSolve()
 	{
 		if (this.pict.LogNoisiness > 3)
@@ -69,12 +101,18 @@ class PictApplication extends libFableServiceBase
 		}
 		return true;
 	}
+	/**
+	 * @param {(error?: Error) => void} fCallback
+	 */
 	onPreSolveAsync(fCallback)
 	{
 		this.onPreSolve();
 		return fCallback();
 	}
 
+	/**
+	 * @return {boolean}
+	 */
 	onBeforeSolve()
 	{
 		if (this.pict.LogNoisiness > 3)
@@ -83,12 +121,18 @@ class PictApplication extends libFableServiceBase
 		}
 		return true;
 	}
+	/**
+	 * @param {(error?: Error) => void} fCallback
+	 */
 	onBeforeSolveAsync(fCallback)
 	{
 		this.onBeforeSolve();
 		return fCallback();
 	}
 
+	/**
+	 * @return {boolean}
+	 */
 	onSolve()
 	{
 		if (this.pict.LogNoisiness > 3)
@@ -97,12 +141,18 @@ class PictApplication extends libFableServiceBase
 		}
 		return true;
 	}
+	/**
+	 * @param {(error?: Error) => void} fCallback
+	 */
 	onSolveAsync(fCallback)
 	{
 		this.onSolve();
 		return fCallback();
 	}
 
+	/**
+	 * @return {boolean}
+	 */
 	solve()
 	{
 		if (this.pict.LogNoisiness > 2)
@@ -151,6 +201,9 @@ class PictApplication extends libFableServiceBase
 		this.lastSolvedTimestamp = this.fable.log.getTimeStamp();
 		return true;
 	}
+	/**
+	 * @param {(error?: Error) => void} fCallback
+	 */
 	solveAsync(fCallback)
 	{
 		let tmpAnticipate = this.fable.instantiateServiceProviderWithoutRegistration('Anticipate');
@@ -164,11 +217,11 @@ class PictApplication extends libFableServiceBase
 		if (!tmpCallback)
 		{
 			this.log.warn(`PictApp [${this.UUID}]::[${this.Hash}] ${this.options.Name} solveAsync was called without a valid callback.  A callback will be generated but this could lead to race conditions.`);
-			tmpCallback = (pError) => 
+			tmpCallback = (pError) =>
 				{
 					if (pError)
 					{
-						this.log.error(`PictApp [${this.UUID}]::[${this.Hash}] ${this.options.Name} solveAsync Auto Callback Error: ${pError}`, pError)						
+						this.log.error(`PictApp [${this.UUID}]::[${this.Hash}] ${this.options.Name} solveAsync Auto Callback Error: ${pError}`, pError)
 					}
 				};
 		}
@@ -223,6 +276,9 @@ class PictApplication extends libFableServiceBase
 			});
 	}
 
+	/**
+	 * @return {boolean}
+	 */
 	onAfterSolve()
 	{
 		if (this.pict.LogNoisiness > 3)
@@ -231,6 +287,9 @@ class PictApplication extends libFableServiceBase
 		}
 		return true;
 	}
+	/**
+	 * @param {(error?: Error) => void} fCallback
+	 */
 	onAfterSolveAsync(fCallback)
 	{
 		this.onAfterSolve();
@@ -240,6 +299,9 @@ class PictApplication extends libFableServiceBase
 	/* -------------------------------------------------------------------------- */
 	/*                     Code Section: Initialize Application                   */
 	/* -------------------------------------------------------------------------- */
+	/**
+	 * @return {boolean}
+	 */
 	onBeforeInitialize()
 	{
 		if (this.pict.LogNoisiness > 3)
@@ -248,12 +310,18 @@ class PictApplication extends libFableServiceBase
 		}
 		return true;
 	}
+	/**
+	 * @param {(error?: Error) => void} fCallback
+	 */
 	onBeforeInitializeAsync(fCallback)
 	{
 		this.onBeforeInitialize();
 		return fCallback();
 	}
 
+	/**
+	 * @return {boolean}
+	 */
 	onInitialize()
 	{
 		if (this.pict.LogNoisiness > 3)
@@ -262,12 +330,18 @@ class PictApplication extends libFableServiceBase
 		}
 		return true;
 	}
+	/**
+	 * @param {(error?: Error) => void} fCallback
+	 */
 	onInitializeAsync(fCallback)
 	{
 		this.onInitialize();
 		return fCallback();
 	}
 
+	/**
+	 * @return {boolean}
+	 */
 	initialize()
 	{
 		if (this.pict.LogControlFlow)
@@ -284,7 +358,7 @@ class PictApplication extends libFableServiceBase
 				// Load all the configuration only views
 				for (let i = 0; i < this.options.ConfigurationOnlyViews.length; i++)
 				{
-					let tmpViewIdentifier = (typeof(this.options.ConfigurationOnlyViews[i].ViewIdentifier) === 'undefined') ? `AutoView-${this.fable.getUUID()}` 
+					let tmpViewIdentifier = (typeof(this.options.ConfigurationOnlyViews[i].ViewIdentifier) === 'undefined') ? `AutoView-${this.fable.getUUID()}`
 											: this.options.ConfigurationOnlyViews[i].ViewIdentifier;
 					this.log.info(`PictApp [${this.UUID}]::[${this.Hash}] ${this.options.Name} adding configuration only view: ${tmpViewIdentifier}`);
 					this.pict.addView(tmpViewIdentifier, this.options.ConfigurationOnlyViews[i]);
@@ -358,6 +432,9 @@ class PictApplication extends libFableServiceBase
 			return false;
 		}
 	}
+	/**
+	 * @param {(error?: Error) => void} fCallback
+	 */
 	initializeAsync(fCallback)
 	{
 		if (this.pict.LogControlFlow)
@@ -371,11 +448,11 @@ class PictApplication extends libFableServiceBase
 		if (!tmpCallback)
 		{
 			this.log.warn(`PictApp [${this.UUID}]::[${this.Hash}] ${this.options.Name} initializeAsync was called without a valid callback.  A callback will be generated but this could lead to race conditions.`);
-			tmpCallback = (pError) => 
+			tmpCallback = (pError) =>
 				{
 					if (pError)
 					{
-						this.log.error(`PictApp [${this.UUID}]::[${this.Hash}] ${this.options.Name} initializeAsync Auto Callback Error: ${pError}`, pError)						
+						this.log.error(`PictApp [${this.UUID}]::[${this.Hash}] ${this.options.Name} initializeAsync Auto Callback Error: ${pError}`, pError)
 					}
 				};
 		}
@@ -394,7 +471,7 @@ class PictApplication extends libFableServiceBase
 				// Load all the configuration only views
 				for (let i = 0; i < this.options.ConfigurationOnlyViews.length; i++)
 				{
-					let tmpViewIdentifier = (typeof(this.options.ConfigurationOnlyViews[i].ViewIdentifier) === 'undefined') ? `AutoView-${this.fable.getUUID()}` 
+					let tmpViewIdentifier = (typeof(this.options.ConfigurationOnlyViews[i].ViewIdentifier) === 'undefined') ? `AutoView-${this.fable.getUUID()}`
 											: this.options.ConfigurationOnlyViews[i].ViewIdentifier;
 					this.log.info(`PictApp [${this.UUID}]::[${this.Hash}] ${this.options.Name} adding configuration only view: ${tmpViewIdentifier}`);
 					this.pict.addView(tmpViewIdentifier, this.options.ConfigurationOnlyViews[i]);
@@ -466,6 +543,10 @@ class PictApplication extends libFableServiceBase
 			tmpAnticipate.wait(
 				(pError) =>
 				{
+					if (pError)
+					{
+						this.log.error(`PictApp [${this.UUID}]::[${this.Hash}] ${this.options.Name} initializeAsync Error: ${pError.message || pError}`, { stack: pError.stack });
+					}
 					this.initializeTimestamp = this.fable.log.getTimeStamp();
 					if (this.pict.LogNoisiness > 2)
 					{
@@ -482,6 +563,9 @@ class PictApplication extends libFableServiceBase
 		}
 	}
 
+	/**
+	 * @return {boolean}
+	 */
 	onAfterInitialize()
 	{
 		if (this.pict.LogNoisiness > 3)
@@ -490,6 +574,9 @@ class PictApplication extends libFableServiceBase
 		}
 		return true;
 	}
+	/**
+	 * @param {(error?: Error) => void} fCallback
+	 */
 	onAfterInitializeAsync(fCallback)
 	{
 		this.onAfterInitialize();
@@ -499,6 +586,9 @@ class PictApplication extends libFableServiceBase
 	/* -------------------------------------------------------------------------- */
 	/*                     Code Section: Marshal Data From All Views              */
 	/* -------------------------------------------------------------------------- */
+	/**
+	 * @return {boolean}
+	 */
 	onBeforeMarshalFromViews()
 	{
 		if (this.pict.LogNoisiness > 3)
@@ -507,12 +597,18 @@ class PictApplication extends libFableServiceBase
 		}
 		return true;
 	}
+	/**
+	 * @param {(error?: Error) => void} fCallback
+	 */
 	onBeforeMarshalFromViewsAsync(fCallback)
 	{
 		this.onBeforeMarshalFromViews();
 		return fCallback();
 	}
 
+	/**
+	 * @return {boolean}
+	 */
 	onMarshalFromViews()
 	{
 		if (this.pict.LogNoisiness > 3)
@@ -521,12 +617,18 @@ class PictApplication extends libFableServiceBase
 		}
 		return true;
 	}
+	/**
+	 * @param {(error?: Error) => void} fCallback
+	 */
 	onMarshalFromViewsAsync(fCallback)
 	{
 		this.onMarshalFromViews();
 		return fCallback();
 	}
 
+	/**
+	 * @return {boolean}
+	 */
 	marshalFromViews()
 	{
 		if (this.pict.LogNoisiness > 2)
@@ -551,6 +653,9 @@ class PictApplication extends libFableServiceBase
 		this.lastMarshalFromViewsTimestamp = this.fable.log.getTimeStamp();
 		return true;
 	}
+	/**
+	 * @param {(error?: Error) => void} fCallback
+	 */
 	marshalFromViewsAsync(fCallback)
 	{
 		let tmpAnticipate = this.fable.instantiateServiceProviderWithoutRegistration('Anticipate');
@@ -561,11 +666,11 @@ class PictApplication extends libFableServiceBase
 		if (!tmpCallback)
 		{
 			this.log.warn(`PictApp [${this.UUID}]::[${this.Hash}] ${this.options.Name} marshalFromViewsAsync was called without a valid callback.  A callback will be generated but this could lead to race conditions.`);
-			tmpCallback = (pError) => 
+			tmpCallback = (pError) =>
 				{
 					if (pError)
 					{
-						this.log.error(`PictApp [${this.UUID}]::[${this.Hash}] ${this.options.Name} marshalFromViewsAsync Auto Callback Error: ${pError}`, pError)						
+						this.log.error(`PictApp [${this.UUID}]::[${this.Hash}] ${this.options.Name} marshalFromViewsAsync Auto Callback Error: ${pError}`, pError)
 					}
 				};
 		}
@@ -598,6 +703,9 @@ class PictApplication extends libFableServiceBase
 			});
 	}
 
+	/**
+	 * @return {boolean}
+	 */
 	onAfterMarshalFromViews()
 	{
 		if (this.pict.LogNoisiness > 3)
@@ -606,6 +714,9 @@ class PictApplication extends libFableServiceBase
 		}
 		return true;
 	}
+	/**
+	 * @param {(error?: Error) => void} fCallback
+	 */
 	onAfterMarshalFromViewsAsync(fCallback)
 	{
 		this.onAfterMarshalFromViews();
@@ -615,6 +726,9 @@ class PictApplication extends libFableServiceBase
 	/* -------------------------------------------------------------------------- */
 	/*                     Code Section: Marshal Data To All Views                */
 	/* -------------------------------------------------------------------------- */
+	/**
+	 * @return {boolean}
+	 */
 	onBeforeMarshalToViews()
 	{
 		if (this.pict.LogNoisiness > 3)
@@ -623,12 +737,18 @@ class PictApplication extends libFableServiceBase
 		}
 		return true;
 	}
+	/**
+	 * @param {(error?: Error) => void} fCallback
+	 */
 	onBeforeMarshalToViewsAsync(fCallback)
 	{
 		this.onBeforeMarshalToViews();
 		return fCallback();
 	}
 
+	/**
+	 * @return {boolean}
+	 */
 	onMarshalToViews()
 	{
 		if (this.pict.LogNoisiness > 3)
@@ -637,12 +757,18 @@ class PictApplication extends libFableServiceBase
 		}
 		return true;
 	}
+	/**
+	 * @param {(error?: Error) => void} fCallback
+	 */
 	onMarshalToViewsAsync(fCallback)
 	{
 		this.onMarshalToViews();
 		return fCallback();
 	}
 
+	/**
+	 * @return {boolean}
+	 */
 	marshalToViews()
 	{
 		if (this.pict.LogNoisiness > 2)
@@ -667,6 +793,9 @@ class PictApplication extends libFableServiceBase
 		this.lastMarshalToViewsTimestamp = this.fable.log.getTimeStamp();
 		return true;
 	}
+	/**
+	 * @param {(error?: Error) => void} fCallback
+	 */
 	marshalToViewsAsync(fCallback)
 	{
 		let tmpAnticipate = this.fable.instantiateServiceProviderWithoutRegistration('Anticipate');
@@ -677,11 +806,11 @@ class PictApplication extends libFableServiceBase
 		if (!tmpCallback)
 		{
 			this.log.warn(`PictApp [${this.UUID}]::[${this.Hash}] ${this.options.Name} marshalToViewsAsync was called without a valid callback.  A callback will be generated but this could lead to race conditions.`);
-			tmpCallback = (pError) => 
+			tmpCallback = (pError) =>
 				{
 					if (pError)
 					{
-						this.log.error(`PictApp [${this.UUID}]::[${this.Hash}] ${this.options.Name} marshalToViewsAsync Auto Callback Error: ${pError}`, pError)						
+						this.log.error(`PictApp [${this.UUID}]::[${this.Hash}] ${this.options.Name} marshalToViewsAsync Auto Callback Error: ${pError}`, pError)
 					}
 				};
 		}
@@ -714,6 +843,9 @@ class PictApplication extends libFableServiceBase
 			});
 	}
 
+	/**
+	 * @return {boolean}
+	 */
 	onAfterMarshalToViews()
 	{
 		if (this.pict.LogNoisiness > 3)
@@ -722,6 +854,9 @@ class PictApplication extends libFableServiceBase
 		}
 		return true;
 	}
+	/**
+	 * @param {(error?: Error) => void} fCallback
+	 */
 	onAfterMarshalToViewsAsync(fCallback)
 	{
 		this.onAfterMarshalToViews();
@@ -731,6 +866,9 @@ class PictApplication extends libFableServiceBase
 	/* -------------------------------------------------------------------------- */
 	/*                     Code Section: Render View                              */
 	/* -------------------------------------------------------------------------- */
+	/**
+	 * @return {boolean}
+	 */
 	onBeforeRender()
 	{
 		if (this.pict.LogNoisiness > 3)
@@ -739,12 +877,23 @@ class PictApplication extends libFableServiceBase
 		}
 		return true;
 	}
+	/**
+	 * @param {(error?: Error) => void} fCallback
+	 */
 	onBeforeRenderAsync(fCallback)
 	{
 		this.onBeforeRender();
 		return fCallback();
 	}
 
+	/**
+	 * @param {string} [pViewIdentifier] - The hash of the view to render. By default, the main viewport view is rendered.
+	 * @param {string} [pRenderableHash] - The hash of the renderable to render.
+	 * @param {string} [pRenderDestinationAddress] - The address where the renderable will be rendered.
+	 * @param {string} [pTemplateDataAddress] - The address where the data for the template is stored.
+	 *
+	 * TODO: Should we support objects for pTemplateDataAddress for parity with pict-view?
+	 */
 	render(pViewIdentifier, pRenderableHash, pRenderDestinationAddress, pTemplateDataAddress)
 	{
 		let tmpViewIdentifier = (typeof(pViewIdentifier) !== 'string') ? this.options.MainViewportViewIdentifier : pViewIdentifier;
@@ -775,6 +924,9 @@ class PictApplication extends libFableServiceBase
 
 		return true;
 	}
+	/**
+	 * @return {boolean}
+	 */
 	onRender()
 	{
 		if (this.pict.LogNoisiness > 3)
@@ -783,12 +935,24 @@ class PictApplication extends libFableServiceBase
 		}
 		return true;
 	}
+	/**
+	 * @param {(error?: Error) => void} fCallback
+	 */
 	onRenderAsync(fCallback)
 	{
 		this.onRender();
 		return fCallback();
 	}
 
+	/**
+	 * @param {string|((error?: Error) => void)} pViewIdentifier - The hash of the view to render. By default, the main viewport view is rendered. (or the callback)
+	 * @param {string|((error?: Error) => void)} [pRenderableHash] - The hash of the renderable to render. (or the callback)
+	 * @param {string|((error?: Error) => void)} [pRenderDestinationAddress] - The address where the renderable will be rendered. (or the callback)
+	 * @param {string|((error?: Error) => void)} [pTemplateDataAddress] - The address where the data for the template is stored. (or the callback)
+	 * @param {(error?: Error) => void} [fCallback] - The callback, if all other parameters are provided.
+	 *
+	 * TODO: Should we support objects for pTemplateDataAddress for parity with pict-view?
+	 */
 	renderAsync(pViewIdentifier, pRenderableHash, pRenderDestinationAddress, pTemplateDataAddress, fCallback)
 	{
 		let tmpViewIdentifier = (typeof(pViewIdentifier) !== 'string') ? this.options.MainViewportViewIdentifier : pViewIdentifier;
@@ -807,11 +971,11 @@ class PictApplication extends libFableServiceBase
 		if (!tmpCallback)
 		{
 			this.log.warn(`PictApp [${this.UUID}]::[${this.Hash}] ${this.options.Name} renderAsync was called without a valid callback.  A callback will be generated but this could lead to race conditions.`);
-			tmpCallback = (pError) => 
+			tmpCallback = (pError) =>
 				{
 					if (pError)
 					{
-						this.log.error(`PictApp [${this.UUID}]::[${this.Hash}] ${this.options.Name} renderAsync Auto Callback Error: ${pError}`, pError)						
+						this.log.error(`PictApp [${this.UUID}]::[${this.Hash}] ${this.options.Name} renderAsync Auto Callback Error: ${pError}`, pError)
 					}
 				};
 		}
@@ -849,6 +1013,9 @@ class PictApplication extends libFableServiceBase
 		return tmpRenderAnticipate.wait(tmpCallback);
 	}
 
+	/**
+	 * @return {boolean}
+	 */
 	onAfterRender()
 	{
 		if (this.pict.LogNoisiness > 3)
@@ -857,13 +1024,18 @@ class PictApplication extends libFableServiceBase
 		}
 		return true;
 	}
+	/**
+	 * @param {(error?: Error) => void} fCallback
+	 */
 	onAfterRenderAsync(fCallback)
 	{
 		this.onAfterRender();
 		return fCallback();
 	}
 
-
+	/**
+	 * @return {boolean}
+	 */
 	renderMainViewport()
 	{
 		if (this.pict.LogControlFlow)
@@ -873,6 +1045,9 @@ class PictApplication extends libFableServiceBase
 
 		return this.render();
 	}
+	/**
+	 * @param {(error?: Error) => void} fCallback
+	 */
 	renderMainViewportAsync(fCallback)
 	{
 		if (this.pict.LogControlFlow)
@@ -882,6 +1057,9 @@ class PictApplication extends libFableServiceBase
 
 		return this.renderAsync(fCallback);
 	}
+	/**
+	 * @return {void}
+	 */
 	renderAutoViews()
 	{
 		if (this.pict.LogNoisiness > 0)
@@ -892,7 +1070,7 @@ class PictApplication extends libFableServiceBase
 		let tmpLoadedViews = Object.keys(this.pict.views);
 		// Sort the views by their priority
 		// If they are all the default priority 0, it will end up being add order due to JSON Object Property Key order stuff
-		tmpLoadedViews.sort((a, b) => 
+		tmpLoadedViews.sort((a, b) =>
 		{
 			return this.pict.views[a].options.AutoRenderOrdinal - this.pict.views[b].options.AutoRenderOrdinal;
 		});
@@ -909,26 +1087,25 @@ class PictApplication extends libFableServiceBase
 			this.log.trace(`PictApp [${this.UUID}]::[${this.Hash}] ${this.options.Name} renderAutoViewsAsync complete.`);
 		}
 	}
+	/**
+	 * @param {(error?: Error) => void} fCallback
+	 */
 	renderAutoViewsAsync(fCallback)
 	{
 		let tmpAnticipate = this.fable.instantiateServiceProviderWithoutRegistration('Anticipate');
 
 		// Allow the callback to be passed in as the last parameter no matter what
 		let tmpCallback = (typeof(fCallback) === 'function') ? fCallback :
-							(typeof(pTemplateDataAddress) === 'function') ? pTemplateDataAddress :
-							(typeof(pRenderDestinationAddress) === 'function') ? pRenderDestinationAddress :
-							(typeof(pRenderableHash) === 'function') ? pRenderableHash :
-							(typeof(pViewIdentifier) === 'function') ? pViewIdentifier :
 							false;
 
 		if (!tmpCallback)
 		{
 			this.log.warn(`PictApp [${this.UUID}]::[${this.Hash}] ${this.options.Name} renderAutoViewsAsync was called without a valid callback.  A callback will be generated but this could lead to race conditions.`);
-			tmpCallback = (pError) => 
+			tmpCallback = (pError) =>
 				{
 					if (pError)
 					{
-						this.log.error(`PictApp [${this.UUID}]::[${this.Hash}] ${this.options.Name} renderAutoViewsAsync Auto Callback Error: ${pError}`, pError)						
+						this.log.error(`PictApp [${this.UUID}]::[${this.Hash}] ${this.options.Name} renderAutoViewsAsync Auto Callback Error: ${pError}`, pError)
 					}
 				};
 		}
@@ -943,7 +1120,7 @@ class PictApplication extends libFableServiceBase
 		let tmpLoadedViews = Object.keys(this.pict.views);
 		// Sort the views by their priority
 		// If they are all the default priority 0, it will end up being add order due to JSON Object Property Key order stuff
-		tmpLoadedViews.sort((a, b) => 
+		tmpLoadedViews.sort((a, b) =>
 		{
 			return this.pict.views[a].options.AutoRenderOrdinal - this.pict.views[b].options.AutoRenderOrdinal;
 		});
@@ -968,6 +1145,9 @@ class PictApplication extends libFableServiceBase
 			});
 	}
 
+	/**
+	 * @return {boolean}
+	 */
 	get isPictApplication()
 	{
 		return true;

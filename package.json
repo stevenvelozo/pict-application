@@ -1,6 +1,6 @@
 {
     "name": "pict-application",
-    "version": "1.0.23",
+    "version": "1.0.24",
     "description": "Application base class for a pict view-based application",
     "main": "source/Pict-Application.js",
     "scripts": {
@@ -11,8 +11,11 @@
         "docker-dev-build": "docker build ./ -f Dockerfile_LUXURYCode -t pict-application-image:local",
         "docker-dev-run": "docker run -it -d --name pict-application-dev -p 30001:8080 -p 38086:8086 -v \"$PWD/.config:/home/coder/.config\"  -v \"$PWD:/home/coder/pict-application\" -u \"$(id -u):$(id -g)\" -e \"DOCKER_USER=$USER\" pict-application-image:local",
         "docker-dev-shell": "docker exec -it pict-application-dev /bin/bash",
-        "tests": "npx mocha -u tdd --exit -R spec --grep"
+        "tests": "npx mocha -u tdd --exit -R spec --grep",
+        "lint": "eslint source/**",
+        "types": "tsc -p ."
     },
+    "types": "types/source/Pict-Application.d.ts",
     "repository": {
         "type": "git",
         "url": "git+https://github.com/stevenvelozo/pict-application.git"
@@ -24,7 +27,9 @@
     },
     "homepage": "https://github.com/stevenvelozo/pict-application#readme",
     "devDependencies": {
+        "@eslint/js": "^9.17.0",
         "browser-env": "^3.3.0",
+        "eslint": "^9.17.0",
         "pict": "^1.0.226",
         "pict-view": "^1.0.55",
         "quackage": "^1.0.36"
