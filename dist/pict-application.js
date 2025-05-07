@@ -192,9 +192,9 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
           "@eslint/js": "^9.17.0",
           "browser-env": "^3.3.0",
           "eslint": "^9.17.0",
-          "pict": "^1.0.226",
-          "pict-view": "^1.0.55",
-          "quackage": "^1.0.36"
+          "pict": "^1.0.238",
+          "pict-view": "^1.0.59",
+          "quackage": "^1.0.41"
         },
         "mocha": {
           "diff": true,
@@ -242,7 +242,8 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
          * @param {string} [pServiceHash]
          */
         constructor(pFable, pOptions, pServiceHash) {
-          let tmpOptions = Object.assign({}, JSON.parse(JSON.stringify(defaultPictSettings)), pOptions);
+          let tmpCarryOverConfiguration = typeof pFable.settings.PictApplicationConfiguration === 'object' ? pFable.settings.PictApplicationConfiguration : {};
+          let tmpOptions = Object.assign({}, JSON.parse(JSON.stringify(defaultPictSettings)), tmpCarryOverConfiguration, pOptions);
           super(pFable, tmpOptions, pServiceHash);
 
           /** @type {any} */
@@ -1157,3 +1158,4 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
     }]
   }, {}, [4])(4);
 });
+//# sourceMappingURL=pict-application.js.map
