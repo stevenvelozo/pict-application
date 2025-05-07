@@ -50,6 +50,27 @@ suite
 							}
 						);
 					test(
+							'Object Initialization with Carried Over Configuration',
+							(fDone) =>
+							{
+								let _Pict = new libPict({PictApplicationConfiguration: {CarriedOverValue: 'Awesome!', AutoRenderMainViewportViewAfterInitialize: false}});
+								let _PictEnvironment = new libPict.EnvironmentLog(_Pict);
+								let _PictApplication = _Pict.addApplication('Pict-PictApplication', {}, libPictApplication);
+								Expect(_PictApplication).to.be.an('object');
+								_PictApplication.initialize();
+
+								// Test package anthropology
+								Expect(_PictApplication._PackageFableServiceProvider).to.be.an('object', 'Fable should have a _PackageFableServiceProvider object.');
+								Expect(_PictApplication._PackageFableServiceProvider.name).equal('fable-serviceproviderbase', 'Fable _PackageFableServiceProvider.package.name should be set.');
+								Expect(_PictApplication._Package).to.be.an('object', 'Fable should have a _Package object.');
+								Expect(_PictApplication._Package.name).to.equal('pict-application', 'Fable _Package.package.name should be set.');
+								Expect(_PictApplication.options.CarriedOverValue).to.equal('Awesome!', 'CarriedOverValue should be set.');
+								Expect(_PictApplication.options.AutoRenderMainViewportViewAfterInitialize).to.equal(false, 'AutoRenderMainViewportViewAfterInitialize should be set.');
+
+								return fDone();
+							}
+						);
+					test(
 							'Simple View Initialization',
 							(fDone) =>
 							{

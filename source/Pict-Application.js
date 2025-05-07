@@ -36,7 +36,8 @@ class PictApplication extends libFableServiceBase
 	 */
 	constructor(pFable, pOptions, pServiceHash)
 	{
-		let tmpOptions = Object.assign({}, JSON.parse(JSON.stringify(defaultPictSettings)), pOptions);
+		let tmpCarryOverConfiguration = (typeof(pFable.settings.PictApplicationConfiguration) === 'object') ? pFable.settings.PictApplicationConfiguration : {};
+		let tmpOptions = Object.assign({}, JSON.parse(JSON.stringify(defaultPictSettings)), tmpCarryOverConfiguration, pOptions);
 		super(pFable, tmpOptions, pServiceHash);
 
 		/** @type {any} */
