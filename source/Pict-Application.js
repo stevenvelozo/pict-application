@@ -16,6 +16,8 @@ const defaultPictSettings = (
 		AutoSolveAfterInitialize: true,
 		AutoRenderMainViewportViewAfterInitialize: true,
 		AutoRenderViewsAfterInitialize: false,
+		AutoLoginAfterInitialize: false,
+		AutoLoadDataAfterLogin: false,
 
 		ConfigurationOnlyViews: [],
 
@@ -56,7 +58,7 @@ class PictApplication extends libFableServiceBase
 		this.servicesMap;
 
 		this.serviceType = 'PictApplication';
-		/** @type {Object} */
+		/** @type {Record<string, any>} */
 		this._Package = libPackage;
 
 		// Convenience and consistency naming
@@ -69,11 +71,15 @@ class PictApplication extends libFableServiceBase
 		/** @type {number} */
 		this.lastSolvedTimestamp;
 		/** @type {number} */
+		this.lastLoginTimestamp;
+		/** @type {number} */
 		this.lastMarshalFromViewsTimestamp;
 		/** @type {number} */
 		this.lastMarshalToViewsTimestamp;
 		/** @type {number} */
 		this.lastAutoRenderTimestamp;
+		/** @type {number} */
+		this.lastLoadDataTimestamp;
 
 		// Load all the manifests for the application
 		let tmpManifestKeys = Object.keys(this.options.Manifests);
@@ -172,7 +178,7 @@ class PictApplication extends libFableServiceBase
 				tmpProvidersToSolve.push(tmpProvider);
 			}
 		}
-		// Sort the views by their priority (if they are all priority 0, it will end up being add order due to JSON Object Property Key order stuff)
+		// Sort the providers by their priority (if they are all priority 0, it will end up being add order due to JSON Object Property Key order stuff)
 		tmpProvidersToSolve.sort((a, b) => { return a.options.AutoSolveOrdinal - b.options.AutoSolveOrdinal; });
 		for (let i = 0; i < tmpProvidersToSolve.length; i++)
 		{
@@ -237,7 +243,7 @@ class PictApplication extends libFableServiceBase
 				tmpProvidersToSolve.push(tmpProvider);
 			}
 		}
-		// Sort the views by their priority (if they are all priority 0, it will end up being add order due to JSON Object Property Key order stuff)
+		// Sort the providers by their priority (if they are all priority 0, it will end up being add order due to JSON Object Property Key order stuff)
 		tmpProvidersToSolve.sort((a, b) => { return a.options.AutoSolveOrdinal - b.options.AutoSolveOrdinal; });
 		for (let i = 0; i < tmpProvidersToSolve.length; i++)
 		{
@@ -294,6 +300,334 @@ class PictApplication extends libFableServiceBase
 	onAfterSolveAsync(fCallback)
 	{
 		this.onAfterSolve();
+		return fCallback();
+	}
+
+	/* -------------------------------------------------------------------------- */
+	/*                     Code Section: Application Login                        */
+	/* -------------------------------------------------------------------------- */
+
+	/**
+	 * @param {(error?: Error) => void} fCallback
+	 */
+	onBeforeLoginAsync(fCallback)
+	{
+		if (this.pict.LogNoisiness > 3)
+		{
+			this.log.trace(`PictApp [${this.UUID}]::[${this.Hash}] ${this.options.Name} onBeforeLoginAsync:`);
+		}
+		return fCallback();
+	}
+
+	/**
+	 * @param {(error?: Error) => void} fCallback
+	 */
+	onLoginAsync(fCallback)
+	{
+		if (this.pict.LogNoisiness > 3)
+		{
+			this.log.trace(`PictApp [${this.UUID}]::[${this.Hash}] ${this.options.Name} onLoginAsync:`);
+		}
+		return fCallback();
+	}
+
+	/**
+	 * @param {(error?: Error) => void} fCallback
+	 */
+	loginAsync(fCallback)
+	{
+		const tmpAnticipate = this.fable.instantiateServiceProviderWithoutRegistration('Anticipate');
+
+		let tmpCallback = fCallback;
+
+		if (typeof(tmpCallback) !== 'function')
+		{
+			this.log.warn(`PictApp [${this.UUID}]::[${this.Hash}] ${this.options.Name} loginAsync was called without a valid callback.  A callback will be generated but this could lead to race conditions.`);
+			tmpCallback = (pError) =>
+				{
+					if (pError)
+					{
+						this.log.error(`PictApp [${this.UUID}]::[${this.Hash}] ${this.options.Name} loginAsync Auto Callback Error: ${pError}`, pError);
+					}
+				};
+		}
+
+		tmpAnticipate.anticipate(this.onBeforeLoginAsync.bind(this));
+		tmpAnticipate.anticipate(this.onLoginAsync.bind(this));
+		tmpAnticipate.anticipate(this.onAfterLoginAsync.bind(this));
+
+		// check and see if we should automatically trigger a data load
+		if (this.options.AutoLoadDataAfterLogin)
+		{
+			tmpAnticipate.anticipate((fNext) =>
+			{
+				if (!this.isLoggedIn())
+				{
+					return fNext();
+				}
+				if (this.pict.LogNoisiness > 1)
+				{
+					this.log.trace(`PictApp [${this.UUID}]::[${this.Hash}] ${this.options.Name} auto loading data after login...`);
+				}
+				//TODO: should data load errors funnel here? this creates a weird coupling between login and data load callbacks
+				this.loadDataAsync((pError) =>
+				{
+					fNext(pError);
+				});
+			});
+		}
+
+		tmpAnticipate.wait(
+			(pError) =>
+			{
+				if (this.pict.LogNoisiness > 2)
+				{
+					this.log.trace(`PictApp [${this.UUID}]::[${this.Hash}] ${this.options.Name} loginAsync() complete.`);
+				}
+				this.lastLoginTimestamp = this.fable.log.getTimeStamp();
+				return tmpCallback(pError);
+			});
+	}
+
+	/**
+	 * Check if the application state is logged in. Defaults to true. Override this method in your application based on login requirements.
+	 *
+	 * @return {boolean}
+	 */
+	isLoggedIn()
+	{
+		return true;
+	}
+
+	/**
+	 * @param {(error?: Error) => void} fCallback
+	 */
+	onAfterLoginAsync(fCallback)
+	{
+		if (this.pict.LogNoisiness > 3)
+		{
+			this.log.trace(`PictApp [${this.UUID}]::[${this.Hash}] ${this.options.Name} onAfterLoginAsync:`);
+		}
+		return fCallback();
+	}
+
+	/* -------------------------------------------------------------------------- */
+	/*                     Code Section: Application LoadData                     */
+	/* -------------------------------------------------------------------------- */
+
+	/**
+	 * @param {(error?: Error) => void} fCallback
+	 */
+	onBeforeLoadDataAsync(fCallback)
+	{
+		if (this.pict.LogNoisiness > 3)
+		{
+			this.log.trace(`PictApp [${this.UUID}]::[${this.Hash}] ${this.options.Name} onBeforeLoadDataAsync:`);
+		}
+		return fCallback();
+	}
+
+	/**
+	 * @param {(error?: Error) => void} fCallback
+	 */
+	onLoadDataAsync(fCallback)
+	{
+		if (this.pict.LogNoisiness > 3)
+		{
+			this.log.trace(`PictApp [${this.UUID}]::[${this.Hash}] ${this.options.Name} onLoadDataAsync:`);
+		}
+		return fCallback();
+	}
+
+	/**
+	 * @param {(error?: Error) => void} fCallback
+	 */
+	loadDataAsync(fCallback)
+	{
+		const tmpAnticipate = this.fable.instantiateServiceProviderWithoutRegistration('Anticipate');
+
+		let tmpCallback = fCallback;
+
+		if (typeof(tmpCallback) !== 'function')
+		{
+			this.log.warn(`PictApp [${this.UUID}]::[${this.Hash}] ${this.options.Name} loadDataAsync was called without a valid callback.  A callback will be generated but this could lead to race conditions.`);
+			tmpCallback = (pError) =>
+				{
+					if (pError)
+					{
+						this.log.error(`PictApp [${this.UUID}]::[${this.Hash}] ${this.options.Name} loadDataAsync Auto Callback Error: ${pError}`, pError);
+					}
+				};
+		}
+
+		tmpAnticipate.anticipate(this.onBeforeLoadDataAsync.bind(this));
+
+		// Walk through any loaded providers and load their data as well.
+		let tmpLoadedProviders = Object.keys(this.pict.providers);
+		let tmpProvidersToLoadData = [];
+		for (let i = 0; i < tmpLoadedProviders.length; i++)
+		{
+			let tmpProvider = this.pict.providers[tmpLoadedProviders[i]];
+			if (tmpProvider.options.AutoLoadDataWithApp)
+			{
+				tmpProvidersToLoadData.push(tmpProvider);
+			}
+		}
+		// Sort the providers by their priority (if they are all priority 0, it will end up being add order due to JSON Object Property Key order stuff)
+		tmpProvidersToLoadData.sort((a, b) => { return a.options.AutoLoadDataOrdinal - b.options.AutoLoadDataOrdinal; });
+
+		for (const tmpProvider of tmpProvidersToLoadData)
+		{
+			tmpAnticipate.anticipate(tmpProvider.onBeforeLoadDataAsync.bind(tmpProvider));
+		}
+
+		tmpAnticipate.anticipate(this.onLoadDataAsync.bind(this));
+
+		//TODO: think about ways to parallelize these
+		for (const tmpProvider of tmpProvidersToLoadData)
+		{
+			tmpAnticipate.anticipate(tmpProvider.onLoadDataAsync.bind(tmpProvider));
+		}
+
+		tmpAnticipate.anticipate(this.onAfterLoadDataAsync.bind(this));
+
+		for (const tmpProvider of tmpProvidersToLoadData)
+		{
+			tmpAnticipate.anticipate(tmpProvider.onAfterLoadDataAsync.bind(tmpProvider));
+		}
+
+		tmpAnticipate.wait(
+			/** @param {Error} [pError] */
+			(pError) =>
+			{
+				if (this.pict.LogNoisiness > 2)
+				{
+					this.log.trace(`PictApp [${this.UUID}]::[${this.Hash}] ${this.options.Name} loadDataAsync() complete.`);
+				}
+				this.lastLoadDataTimestamp = this.fable.log.getTimeStamp();
+				return tmpCallback(pError);
+			});
+	}
+
+	/**
+	 * @param {(error?: Error) => void} fCallback
+	 */
+	onAfterLoadDataAsync(fCallback)
+	{
+		if (this.pict.LogNoisiness > 3)
+		{
+			this.log.trace(`PictApp [${this.UUID}]::[${this.Hash}] ${this.options.Name} onAfterLoadDataAsync:`);
+		}
+		return fCallback();
+	}
+
+	/* -------------------------------------------------------------------------- */
+	/*                     Code Section: Application SaveData                     */
+	/* -------------------------------------------------------------------------- */
+
+	/**
+	 * @param {(error?: Error) => void} fCallback
+	 */
+	onBeforeSaveDataAsync(fCallback)
+	{
+		if (this.pict.LogNoisiness > 3)
+		{
+			this.log.trace(`PictApp [${this.UUID}]::[${this.Hash}] ${this.options.Name} onBeforeSaveDataAsync:`);
+		}
+		return fCallback();
+	}
+
+	/**
+	 * @param {(error?: Error) => void} fCallback
+	 */
+	onSaveDataAsync(fCallback)
+	{
+		if (this.pict.LogNoisiness > 3)
+		{
+			this.log.trace(`PictApp [${this.UUID}]::[${this.Hash}] ${this.options.Name} onSaveDataAsync:`);
+		}
+		return fCallback();
+	}
+
+	/**
+	 * @param {(error?: Error) => void} fCallback
+	 */
+	saveDataAsync(fCallback)
+	{
+		const tmpAnticipate = this.fable.instantiateServiceProviderWithoutRegistration('Anticipate');
+
+		let tmpCallback = fCallback;
+
+		if (typeof(tmpCallback) !== 'function')
+		{
+			this.log.warn(`PictApp [${this.UUID}]::[${this.Hash}] ${this.options.Name} saveDataAsync was called without a valid callback.  A callback will be generated but this could lead to race conditions.`);
+			tmpCallback = (pError) =>
+				{
+					if (pError)
+					{
+						this.log.error(`PictApp [${this.UUID}]::[${this.Hash}] ${this.options.Name} saveDataAsync Auto Callback Error: ${pError}`, pError);
+					}
+				};
+		}
+
+		tmpAnticipate.anticipate(this.onBeforeSaveDataAsync.bind(this));
+
+		// Walk through any loaded providers and load their data as well.
+		let tmpLoadedProviders = Object.keys(this.pict.providers);
+		let tmpProvidersToSaveData = [];
+		for (let i = 0; i < tmpLoadedProviders.length; i++)
+		{
+			let tmpProvider = this.pict.providers[tmpLoadedProviders[i]];
+			if (tmpProvider.options.AutoSaveDataWithApp)
+			{
+				tmpProvidersToSaveData.push(tmpProvider);
+			}
+		}
+		// Sort the providers by their priority (if they are all priority 0, it will end up being add order due to JSON Object Property Key order stuff)
+		tmpProvidersToSaveData.sort((a, b) => { return a.options.AutoSaveDataOrdinal - b.options.AutoSaveDataOrdinal; });
+
+		for (const tmpProvider of tmpProvidersToSaveData)
+		{
+			tmpAnticipate.anticipate(tmpProvider.onBeforeSaveDataAsync.bind(tmpProvider));
+		}
+
+		tmpAnticipate.anticipate(this.onSaveDataAsync.bind(this));
+
+		//TODO: think about ways to parallelize these
+		for (const tmpProvider of tmpProvidersToSaveData)
+		{
+			tmpAnticipate.anticipate(tmpProvider.onSaveDataAsync.bind(tmpProvider));
+		}
+
+		tmpAnticipate.anticipate(this.onAfterSaveDataAsync.bind(this));
+
+		for (const tmpProvider of tmpProvidersToSaveData)
+		{
+			tmpAnticipate.anticipate(tmpProvider.onAfterSaveDataAsync.bind(tmpProvider));
+		}
+
+		tmpAnticipate.wait(
+			/** @param {Error} [pError] */
+			(pError) =>
+			{
+				if (this.pict.LogNoisiness > 2)
+				{
+					this.log.trace(`PictApp [${this.UUID}]::[${this.Hash}] ${this.options.Name} saveDataAsync() complete.`);
+				}
+				this.lastSaveDataTimestamp = this.fable.log.getTimeStamp();
+				return tmpCallback(pError);
+			});
+	}
+
+	/**
+	 * @param {(error?: Error) => void} fCallback
+	 */
+	onAfterSaveDataAsync(fCallback)
+	{
+		if (this.pict.LogNoisiness > 3)
+		{
+			this.log.trace(`PictApp [${this.UUID}]::[${this.Hash}] ${this.options.Name} onAfterSaveDataAsync:`);
+		}
 		return fCallback();
 	}
 
@@ -379,7 +713,7 @@ class PictApplication extends libFableServiceBase
 					tmpProvidersToInitialize.push(tmpProvider);
 				}
 			}
-			// Sort the views by their priority (if they are all priority 0, it will end up being add order due to JSON Object Property Key order stuff)
+			// Sort the providers by their priority (if they are all priority 0, it will end up being add order due to JSON Object Property Key order stuff)
 			tmpProvidersToInitialize.sort((a, b) => { return a.options.AutoInitializeOrdinal - b.options.AutoInitializeOrdinal; });
 			for (let i = 0; i < tmpProvidersToInitialize.length; i++)
 			{
@@ -493,7 +827,7 @@ class PictApplication extends libFableServiceBase
 					tmpProvidersToInitialize.push(tmpProvider);
 				}
 			}
-			// Sort the views by their priority (if they are all priority 0, it will end up being add order due to JSON Object Property Key order stuff)
+			// Sort the providers by their priority (if they are all priority 0, it will end up being add order due to JSON Object Property Key order stuff)
 			tmpProvidersToInitialize.sort((a, b) => { return a.options.AutoInitializeOrdinal - b.options.AutoInitializeOrdinal; });
 			for (let i = 0; i < tmpProvidersToInitialize.length; i++)
 			{
@@ -522,6 +856,15 @@ class PictApplication extends libFableServiceBase
 			}
 
 			tmpAnticipate.anticipate(this.onAfterInitializeAsync.bind(this));
+
+			if (this.options.AutoLoginAfterInitialize)
+			{
+				if (this.pict.LogNoisiness > 1)
+				{
+					this.log.trace(`PictApp [${this.UUID}]::[${this.Hash}] ${this.options.Name} auto solving (asynchronously) after initialization...`);
+				}
+				tmpAnticipate.anticipate(this.loginAsync.bind(this));
+			}
 
 			if (this.options.AutoSolveAfterInitialize)
 			{
@@ -654,6 +997,7 @@ class PictApplication extends libFableServiceBase
 		this.lastMarshalFromViewsTimestamp = this.fable.log.getTimeStamp();
 		return true;
 	}
+
 	/**
 	 * @param {(error?: Error) => void} fCallback
 	 */

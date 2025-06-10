@@ -26,8 +26,8 @@ declare class PictApplication {
         [key: string]: any;
     };
     serviceType: string;
-    /** @type {Object} */
-    _Package: any;
+    /** @type {Record<string, any>} */
+    _Package: Record<string, any>;
     pict: any;
     AppData: any;
     /** @type {number} */
@@ -35,11 +35,15 @@ declare class PictApplication {
     /** @type {number} */
     lastSolvedTimestamp: number;
     /** @type {number} */
+    lastLoginTimestamp: number;
+    /** @type {number} */
     lastMarshalFromViewsTimestamp: number;
     /** @type {number} */
     lastMarshalToViewsTimestamp: number;
     /** @type {number} */
     lastAutoRenderTimestamp: number;
+    /** @type {number} */
+    lastLoadDataTimestamp: number;
     /**
      * @return {boolean}
      */
@@ -80,6 +84,61 @@ declare class PictApplication {
      * @param {(error?: Error) => void} fCallback
      */
     onAfterSolveAsync(fCallback: (error?: Error) => void): void;
+    /**
+     * @param {(error?: Error) => void} fCallback
+     */
+    onBeforeLoginAsync(fCallback: (error?: Error) => void): void;
+    /**
+     * @param {(error?: Error) => void} fCallback
+     */
+    onLoginAsync(fCallback: (error?: Error) => void): void;
+    /**
+     * @param {(error?: Error) => void} fCallback
+     */
+    loginAsync(fCallback: (error?: Error) => void): void;
+    /**
+     * Check if the application state is logged in. Defaults to true. Override this method in your application based on login requirements.
+     *
+     * @return {boolean}
+     */
+    isLoggedIn(): boolean;
+    /**
+     * @param {(error?: Error) => void} fCallback
+     */
+    onAfterLoginAsync(fCallback: (error?: Error) => void): void;
+    /**
+     * @param {(error?: Error) => void} fCallback
+     */
+    onBeforeLoadDataAsync(fCallback: (error?: Error) => void): void;
+    /**
+     * @param {(error?: Error) => void} fCallback
+     */
+    onLoadDataAsync(fCallback: (error?: Error) => void): void;
+    /**
+     * @param {(error?: Error) => void} fCallback
+     */
+    loadDataAsync(fCallback: (error?: Error) => void): void;
+    /**
+     * @param {(error?: Error) => void} fCallback
+     */
+    onAfterLoadDataAsync(fCallback: (error?: Error) => void): void;
+    /**
+     * @param {(error?: Error) => void} fCallback
+     */
+    onBeforeSaveDataAsync(fCallback: (error?: Error) => void): void;
+    /**
+     * @param {(error?: Error) => void} fCallback
+     */
+    onSaveDataAsync(fCallback: (error?: Error) => void): void;
+    /**
+     * @param {(error?: Error) => void} fCallback
+     */
+    saveDataAsync(fCallback: (error?: Error) => void): void;
+    lastSaveDataTimestamp: any;
+    /**
+     * @param {(error?: Error) => void} fCallback
+     */
+    onAfterSaveDataAsync(fCallback: (error?: Error) => void): void;
     /**
      * @return {boolean}
      */

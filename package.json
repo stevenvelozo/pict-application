@@ -27,11 +27,12 @@
     },
     "homepage": "https://github.com/stevenvelozo/pict-application#readme",
     "devDependencies": {
-        "@eslint/js": "^9.17.0",
+        "@eslint/js": "^9.28.0",
         "browser-env": "^3.3.0",
-        "eslint": "^9.17.0",
-        "pict": "^1.0.238",
-        "pict-view": "^1.0.59",
+        "eslint": "^9.28.0",
+        "pict": "^1.0.270",
+        "pict-provider": "^1.0.5",
+        "pict-view": "^1.0.60",
         "quackage": "^1.0.41"
     },
     "mocha": {

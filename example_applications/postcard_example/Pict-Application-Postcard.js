@@ -22,6 +22,8 @@ class PostcardApplication extends libPictApplication
 		this.pict.addView('PictFormMetacontroller', {}, libPictSectionForm.PictFormMetacontroller);
 
 		this.pict.addView('PostcardMainApplication', libMainApplicationView.default_configuration, libMainApplicationView);
+
+		this.loggedIn = false;
 	}
 
 	changeToDefaultTheme()
@@ -53,7 +55,13 @@ class PostcardApplication extends libPictApplication
 		this.pict.views.PostcardMainApplication.render();
 		this.pict.views.PictFormMetacontroller.render();
 
-		return super.onAfterInitialize(fCallback);
+		return super.onAfterInitializeAsync(fCallback);
+	}
+
+	onAfterLoadDataAsync(fCallback)
+	{
+		this.pict.log.info('PostcardApplication: onAfterLoadDataAsync: Data load complete.');
+		return super.onAfterLoadDataAsync(fCallback);
 	}
 
 	marshalDataFromViewToAppData()
@@ -65,6 +73,33 @@ class PostcardApplication extends libPictApplication
 	{
 		this.pict.views.PictFormMetacontroller.marshalToView();
 	}
+
+	onLoginAsync(fCallback)
+	{
+		// simulate a check session
+		setTimeout(() =>
+		{
+			this.loggedIn = true;
+			this.log.info('PostcardApplication: onLoginAsync: Simulating login...');
+			return super.onLoginAsync(fCallback);
+		}, 100);
+	}
+
+	isLoggedIn()
+	{
+		return this.loggedIn;
+	}
+
+	onLoadDataAsync(fCallback)
+	{
+		// simulate a load data
+		setTimeout(() =>
+		{
+			this.data = { };
+			this.log.info('PostcardApplication: onLoadDataAsync: Simulating data load...');
+			return super.onLoadDataAsync(fCallback);
+		}, 100);
+	}
 };
 
 module.exports = PostcardApplication
@@ -75,6 +110,8 @@ module.exports.default_configuration = (
 	"Hash": "Postcard",
 
 	"MainViewportViewIdentifier": "PostcardNavigation",
+	"AutoLoginAfterInitialize": true,
+	"AutoLoadDataAfterLogin": true,
 
 	"ConfigurationOnlyViews":
 	[	require('./views/PictView-Postcard-Navigation.json'),

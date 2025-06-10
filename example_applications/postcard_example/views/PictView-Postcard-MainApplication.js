@@ -41,7 +41,7 @@ class PostcardMainApplicationView extends libPictView
 
 	onAfterInitialize()
 	{
-		this.pict.views.PostcardNavigation.render()
+		this.pict.views.PostcardNavigation.render();
 		return super.onAfterInitialize();
 	}
 

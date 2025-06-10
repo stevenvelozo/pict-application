@@ -16,6 +16,15 @@ class PostcardDynamicSectionProvider extends libPictProvider
 		super(pFable, tmpOptions, pServiceHash);
 	}
 
+	onLoadDataAsync(fCallback)
+	{
+		setTimeout(() =>
+		{
+			this.log.info('PostcardDynamicSectionProvider.onLoadDataAsync() called --- simulating data load from "server".');
+			fCallback();
+		}, 100);
+	}
+
 	onInitializeAsync(fCallback)
 	{
 		this.log.info('PostcardDynamicSectionProvider.onInitializeAsync() called --- loading dynamic section views from "server".');
