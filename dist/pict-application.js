@@ -162,7 +162,7 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
     3: [function (require, module, exports) {
       module.exports = {
         "name": "pict-application",
-        "version": "1.0.25",
+        "version": "1.0.26",
         "description": "Application base class for a pict view-based application",
         "main": "source/Pict-Application.js",
         "scripts": {
