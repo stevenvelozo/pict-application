@@ -33,7 +33,7 @@ class PictApplication extends libFableServiceBase
 {
 	/**
 	 * @param {import('fable')} pFable
-	 * @param {any} [pOptions]
+	 * @param {Record<string, any>} [pOptions]
 	 * @param {string} [pServiceHash]
 	 */
 	constructor(pFable, pOptions, pServiceHash)
@@ -64,7 +64,10 @@ class PictApplication extends libFableServiceBase
 		// Convenience and consistency naming
 		this.pict = this.fable;
 		// Wire in the essential Pict state
+		/** @type {Record<string, any>} */
 		this.AppData = this.fable.AppData;
+		/** @type {Record<string, any>} */
+		this.Bundle = this.fable.Bundle;
 
 		/** @type {number} */
 		this.initializeTimestamp;

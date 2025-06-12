@@ -162,7 +162,7 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
     3: [function (require, module, exports) {
       module.exports = {
         "name": "pict-application",
-        "version": "1.0.26",
+        "version": "1.0.27",
         "description": "Application base class for a pict view-based application",
         "main": "source/Pict-Application.js",
         "scripts": {
@@ -192,7 +192,7 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
           "@eslint/js": "^9.28.0",
           "browser-env": "^3.3.0",
           "eslint": "^9.28.0",
-          "pict": "^1.0.270",
+          "pict": "^1.0.272",
           "pict-provider": "^1.0.5",
           "pict-view": "^1.0.60",
           "quackage": "^1.0.41"
@@ -241,7 +241,7 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
       class PictApplication extends libFableServiceBase {
         /**
          * @param {import('fable')} pFable
-         * @param {any} [pOptions]
+         * @param {Record<string, any>} [pOptions]
          * @param {string} [pServiceHash]
          */
         constructor(pFable, pOptions, pServiceHash) {
@@ -270,7 +270,10 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
           // Convenience and consistency naming
           this.pict = this.fable;
           // Wire in the essential Pict state
+          /** @type {Record<string, any>} */
           this.AppData = this.fable.AppData;
+          /** @type {Record<string, any>} */
+          this.Bundle = this.fable.Bundle;
 
           /** @type {number} */
           this.initializeTimestamp;

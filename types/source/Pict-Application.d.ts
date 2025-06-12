@@ -5,10 +5,10 @@ export = PictApplication;
 declare class PictApplication {
     /**
      * @param {import('fable')} pFable
-     * @param {any} [pOptions]
+     * @param {Record<string, any>} [pOptions]
      * @param {string} [pServiceHash]
      */
-    constructor(pFable: any, pOptions?: any, pServiceHash?: string);
+    constructor(pFable: any, pOptions?: Record<string, any>, pServiceHash?: string);
     /** @type {any} */
     options: any;
     /** @type {any} */
@@ -29,7 +29,10 @@ declare class PictApplication {
     /** @type {Record<string, any>} */
     _Package: Record<string, any>;
     pict: any;
-    AppData: any;
+    /** @type {Record<string, any>} */
+    AppData: Record<string, any>;
+    /** @type {Record<string, any>} */
+    Bundle: Record<string, any>;
     /** @type {number} */
     initializeTimestamp: number;
     /** @type {number} */
