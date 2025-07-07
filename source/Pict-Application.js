@@ -864,7 +864,7 @@ class PictApplication extends libFableServiceBase
 			{
 				if (this.pict.LogNoisiness > 1)
 				{
-					this.log.trace(`PictApp [${this.UUID}]::[${this.Hash}] ${this.options.Name} auto solving (asynchronously) after initialization...`);
+					this.log.trace(`PictApp [${this.UUID}]::[${this.Hash}] ${this.options.Name} auto login (asynchronously) after initialization...`);
 				}
 				tmpAnticipate.anticipate(this.loginAsync.bind(this));
 			}
