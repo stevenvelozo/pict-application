@@ -27,6 +27,14 @@ class HistoricalEventsApp extends libPictApplication
 		// Run the static function to generate the category list set into AppData.
 		viewHistoricalEventsCategories.marshal_JSONData_Into_Object(this.AppData.HistoricalEventSet, this.AppData);
 	}
+
+	onCompletionOfInitialize()
+	{
+		super.onCompletionOfInitialize();
+		
+		// Any other custom stuff we need to do after initialization and magic is done.
+		this.log.info(`HistoricalEventsApp [${this.UUID}]::[${this.Hash}] ${this.options.Name} has completed initialization.`);
+	}
 };
 
 module.exports = HistoricalEventsApp

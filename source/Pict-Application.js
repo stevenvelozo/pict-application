@@ -762,6 +762,7 @@ class PictApplication extends libFableServiceBase
 				this.render();
 			}
 			this.initializeTimestamp = this.fable.log.getTimeStamp();
+			this.onCompletionOfInitialize();
 			return true;
 		}
 		else
@@ -906,7 +907,7 @@ class PictApplication extends libFableServiceBase
 		{
 			this.log.warn(`PictApp [${this.UUID}]::[${this.Hash}] ${this.options.Name} async initialize called but initialization is already completed.  Aborting.`);
 			// TODO: Should this be an error?
-			return tmpCallback();
+			return this.onCompletionOfInitializeAsync(tmpCallback);
 		}
 	}
 
@@ -927,6 +928,27 @@ class PictApplication extends libFableServiceBase
 	onAfterInitializeAsync(fCallback)
 	{
 		this.onAfterInitialize();
+		return fCallback();
+	}
+
+
+	/**
+	 * @return {boolean}
+	 */
+	onCompletionOfInitialize()
+	{
+		if (this.pict.LogNoisiness > 3)
+		{
+			this.log.trace(`PictApp [${this.UUID}]::[${this.Hash}] ${this.options.Name} onCompletionOfInitialize:`);
+		}
+		return true;
+	}
+	/**
+	 * @param {(error?: Error) => void} fCallback
+	 */
+	onCompletionOfInitializeAsync(fCallback)
+	{
+		this.onCompletionOfInitialize();
 		return fCallback();
 	}
 
