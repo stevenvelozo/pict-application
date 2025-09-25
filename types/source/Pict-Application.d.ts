@@ -177,6 +177,14 @@ declare class PictApplication {
     /**
      * @return {boolean}
      */
+    onCompletionOfInitialize(): boolean;
+    /**
+     * @param {(error?: Error) => void} fCallback
+     */
+    onCompletionOfInitializeAsync(fCallback: (error?: Error) => void): void;
+    /**
+     * @return {boolean}
+     */
     onBeforeMarshalFromViews(): boolean;
     /**
      * @param {(error?: Error) => void} fCallback

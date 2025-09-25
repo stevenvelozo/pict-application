@@ -162,7 +162,7 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
     3: [function (require, module, exports) {
       module.exports = {
         "name": "pict-application",
-        "version": "1.0.27",
+        "version": "1.0.29",
         "description": "Application base class for a pict view-based application",
         "main": "source/Pict-Application.js",
         "scripts": {
@@ -192,10 +192,10 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
           "@eslint/js": "^9.28.0",
           "browser-env": "^3.3.0",
           "eslint": "^9.28.0",
-          "pict": "^1.0.272",
-          "pict-provider": "^1.0.5",
-          "pict-view": "^1.0.60",
-          "quackage": "^1.0.41"
+          "pict": "^1.0.303",
+          "pict-provider": "^1.0.6",
+          "pict-view": "^1.0.63",
+          "quackage": "^1.0.42"
         },
         "mocha": {
           "diff": true,
@@ -630,7 +630,7 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
           for (const tmpProvider of tmpProvidersToLoadData) {
             tmpAnticipate.anticipate(tmpProvider.onAfterLoadDataAsync.bind(tmpProvider));
           }
-          tmpAnticipate.wait(/** @param {Error} [pError] */
+          tmpAnticipate.wait( /** @param {Error} [pError] */
           pError => {
             if (this.pict.LogNoisiness > 2) {
               this.log.trace(`PictApp [${this.UUID}]::[${this.Hash}] ${this.options.Name} loadDataAsync() complete.`);
@@ -716,7 +716,7 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
           for (const tmpProvider of tmpProvidersToSaveData) {
             tmpAnticipate.anticipate(tmpProvider.onAfterSaveDataAsync.bind(tmpProvider));
           }
-          tmpAnticipate.wait(/** @param {Error} [pError] */
+          tmpAnticipate.wait( /** @param {Error} [pError] */
           pError => {
             if (this.pict.LogNoisiness > 2) {
               this.log.trace(`PictApp [${this.UUID}]::[${this.Hash}] ${this.options.Name} saveDataAsync() complete.`);
@@ -842,6 +842,7 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
               this.render();
             }
             this.initializeTimestamp = this.fable.log.getTimeStamp();
+            this.onCompletionOfInitialize();
             return true;
           } else {
             this.log.warn(`PictApp [${this.UUID}]::[${this.Hash}] ${this.options.Name} initialize called but initialization is already completed.  Aborting.`);
@@ -921,7 +922,7 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
             tmpAnticipate.anticipate(this.onAfterInitializeAsync.bind(this));
             if (this.options.AutoLoginAfterInitialize) {
               if (this.pict.LogNoisiness > 1) {
-                this.log.trace(`PictApp [${this.UUID}]::[${this.Hash}] ${this.options.Name} auto solving (asynchronously) after initialization...`);
+                this.log.trace(`PictApp [${this.UUID}]::[${this.Hash}] ${this.options.Name} auto login (asynchronously) after initialization...`);
               }
               tmpAnticipate.anticipate(this.loginAsync.bind(this));
             }
@@ -952,7 +953,7 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
           } else {
             this.log.warn(`PictApp [${this.UUID}]::[${this.Hash}] ${this.options.Name} async initialize called but initialization is already completed.  Aborting.`);
             // TODO: Should this be an error?
-            return tmpCallback();
+            return this.onCompletionOfInitializeAsync(tmpCallback);
           }
         }
 
@@ -970,6 +971,23 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
          */
         onAfterInitializeAsync(fCallback) {
           this.onAfterInitialize();
+          return fCallback();
+        }
+
+        /**
+         * @return {boolean}
+         */
+        onCompletionOfInitialize() {
+          if (this.pict.LogNoisiness > 3) {
+            this.log.trace(`PictApp [${this.UUID}]::[${this.Hash}] ${this.options.Name} onCompletionOfInitialize:`);
+          }
+          return true;
+        }
+        /**
+         * @param {(error?: Error) => void} fCallback
+         */
+        onCompletionOfInitializeAsync(fCallback) {
+          this.onCompletionOfInitialize();
           return fCallback();
         }
 
