@@ -162,7 +162,7 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
     3: [function (require, module, exports) {
       module.exports = {
         "name": "pict-application",
-        "version": "1.0.29",
+        "version": "1.0.30",
         "description": "Application base class for a pict view-based application",
         "main": "source/Pict-Application.js",
         "scripts": {
@@ -192,10 +192,10 @@ function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = 
           "@eslint/js": "^9.28.0",
           "browser-env": "^3.3.0",
           "eslint": "^9.28.0",
-          "pict": "^1.0.303",
-          "pict-provider": "^1.0.6",
-          "pict-view": "^1.0.63",
-          "quackage": "^1.0.42"
+          "pict": "^1.0.343",
+          "pict-provider": "^1.0.7",
+          "pict-view": "^1.0.64",
+          "quackage": "^1.0.45"
         },
         "mocha": {
           "diff": true,
