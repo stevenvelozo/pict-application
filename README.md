@@ -1,13 +1,47 @@
 # Pict Application
 
-It does stuff. With stuff.  More to come.
+Application base class for building pict view-based applications. Provides structured lifecycle management, view coordination, and data marshaling for web, console, and other applications where the UI is primarily represented as text strings.
 
-# Usage
+## Installation
+
+```bash
+npm install pict-application
+```
+
+## Usage
 
 ```js
 const libPict = require('pict');
+const libPictApplication = require('pict-application');
 
-let tmpView = libPict.addView("PictApplication-Hash", {Options:"Set here"}, require(pict-application));
+// Create a Pict instance
+const _Pict = new libPict();
 
-tmpView.render();
+// Add an application
+const myApp = _Pict.addApplication('MyApp', {
+    Name: 'My Application',
+    MainViewportViewIdentifier: 'Main-View',
+    AutoRenderMainViewportViewAfterInitialize: true
+}, libPictApplication);
+
+// Initialize the application
+myApp.initialize();
 ```
+
+## Documentation
+
+- [README](docs/README.md) - Full documentation and API reference
+- [Getting Started](docs/GETTING_STARTED.md) - Step-by-step tutorial
+- [Configuration](docs/CONFIGURATION.md) - Complete configuration reference
+- [Examples](docs/EXAMPLES.md) - Example application walkthroughs
+
+## Related Projects
+
+- [pict](https://github.com/stevenvelozo/pict) - Core Pict framework
+- [pict-view](https://github.com/stevenvelozo/pict-view) - View base class
+- [pict-provider](https://github.com/stevenvelozo/pict-provider) - Provider base class
+- [fable](https://github.com/stevenvelozo/fable) - Service provider framework
+
+## License
+
+MIT
