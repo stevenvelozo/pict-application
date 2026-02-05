@@ -1,34 +1,17 @@
-# Pict Application
+# Pict-Application
 
 > Application base class for building pict view-based applications
 
-**Version:** 1.0.30
-**License:** MIT
-**Author:** Steven Velozo <steven@velozo.com>
+Pict-Application provides a structured foundation for building web, console, and other applications where the UI is primarily represented as text strings. It extends the Pict ecosystem by providing application lifecycle management, view coordination, and data marshaling capabilities.
 
----
+## Features
 
-## Overview
-
-Pict Application provides a structured foundation for building web, console, and other applications where the UI is primarily represented as text strings. It extends the Pict ecosystem by providing application lifecycle management, view coordination, and data marshaling capabilities.
-
-Pict is a non-opinionated set of tools implementing Model, View, and Controller patterns. Unlike traditional MVC frameworks, Pict views are flexible and composable, designed to work with the Fable service provider architecture.
-
----
-
-## Installation
-
-```bash
-npm install pict-application
-```
-
-**Dependencies:**
-- `fable-serviceproviderbase` (runtime)
-- `pict` (peer dependency)
-- `pict-view` (peer dependency for views)
-- `pict-provider` (optional, for data providers)
-
----
+- **Lifecycle Management** - Complete initialization, solving, rendering, and marshaling lifecycles
+- **View Coordination** - Manages multiple views with automatic rendering and solving
+- **Data Marshaling** - Two-way data binding between views and application state
+- **Provider Integration** - Coordinates data providers for loading and saving
+- **Login Support** - Built-in authentication lifecycle hooks
+- **Async Support** - Both synchronous and asynchronous lifecycle methods
 
 ## Quick Start
 
@@ -49,7 +32,11 @@ const myApp = _Pict.addApplication('MyApp', {
 myApp.initialize();
 ```
 
----
+## Installation
+
+```bash
+npm install pict-application
+```
 
 ## Configuration
 
@@ -111,7 +98,6 @@ const _Pict = new libPict({
 });
 ```
 
----
 
 ## Application Lifecycle
 
@@ -169,7 +155,6 @@ onBeforeMarshalFromViews() → [View Marshal] → onMarshalFromViews() → onAft
 onBeforeMarshalToViews() → [View Marshal] → onMarshalToViews() → onAfterMarshalToViews()
 ```
 
----
 
 ## Creating an Application
 
@@ -242,7 +227,6 @@ class AuthenticatedApplication extends libPictApplication {
 }
 ```
 
----
 
 ## Working with Views
 
@@ -331,7 +315,6 @@ class CustomView extends libPictView {
 module.exports = CustomView;
 ```
 
----
 
 ## Renderables
 
@@ -390,7 +373,6 @@ myView.addRenderable({
 });
 ```
 
----
 
 ## Providers
 
@@ -452,7 +434,6 @@ _Pict.addProvider('DataProvider', {
 }, DataProvider);
 ```
 
----
 
 ## API Reference
 
@@ -548,7 +529,6 @@ All lifecycle hooks have both sync and async variants:
 - `onMarshalToViews()` / `onMarshalToViewsAsync(callback)`
 - `onAfterMarshalToViews()` / `onAfterMarshalToViewsAsync(callback)`
 
----
 
 ## Template Syntax
 
@@ -560,7 +540,6 @@ Pict uses a template syntax with special markers:
 | `{~TS:hash:address~}` | Template set (loop) | `{~TS:Row-Template:AppData.Items~}` |
 | `{~Digits:path~}` | Format as digits | `{~Digits:Record.count~}` |
 
----
 
 ## Examples
 
@@ -589,7 +568,6 @@ cd example_applications
 node ServeExamples.js
 ```
 
----
 
 ## Testing
 
@@ -604,7 +582,6 @@ npm run tests -- "Object Initialization"
 npm run coverage
 ```
 
----
 
 ## Building
 
@@ -619,17 +596,15 @@ npm run types
 npm run lint
 ```
 
----
 
 ## Related Packages
 
-- **[pict](https://github.com/stevenvelozo/pict)** - Core Pict framework
-- **[pict-view](https://github.com/stevenvelozo/pict-view)** - View base class
-- **[pict-provider](https://github.com/stevenvelozo/pict-provider)** - Provider base class
-- **[fable](https://github.com/stevenvelozo/fable)** - Service provider framework
-- **[quackage](https://github.com/stevenvelozo/quackage)** - Build tooling
+- [pict](https://github.com/stevenvelozo/pict) - Core Pict framework
+- [pict-view](https://github.com/stevenvelozo/pict-view) - View base class
+- [pict-provider](https://github.com/stevenvelozo/pict-provider) - Provider base class
+- [fable](https://github.com/stevenvelozo/fable) - Service provider framework
+- [quackage](https://github.com/stevenvelozo/quackage) - Build tooling
 
----
 
 ## License
 

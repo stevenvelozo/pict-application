@@ -1,4 +1,4 @@
-# Pict-Application <small>1.0</small>
+# Pict-Application <small>1</small>
 
 > Application base class for building pict view-based applications
 
