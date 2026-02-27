@@ -143,3 +143,15 @@ out
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+
+# Added by quackage update-node-gitignore
+
+# Test Environment
+debug/testenv
+
+# Quackage takes care of these for me!
+.babelrc
+.browserslistrc
+
+# Nuxt.js build / generate output
+dist
